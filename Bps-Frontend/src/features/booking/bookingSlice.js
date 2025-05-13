@@ -83,7 +83,9 @@ export const fetchBookingsByType = createAsyncThunk(
 export const viewBookingById = createAsyncThunk(
   '/booking/viewBookingById', async(bookingId,thunkApi)=>{
     try{
+      console.log("booking",bookingId);
       const res = await axios.get(`${BASE_URL}/${bookingId}`)
+      console.log("booking",res)
       return res.data;
     }
     catch(err)

@@ -43,7 +43,7 @@ export const viewBooking = async (req, res) => {
  * POST /api/bookings
  */
 export const createBooking = async (req, res) => {
-  console.log("req", req.email);
+  console.log("req", req.body);
   try {
     const {
       startStation: startName,

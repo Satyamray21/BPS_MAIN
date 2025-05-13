@@ -141,9 +141,13 @@ const BookingCard = () => {
     setPage(0);
   };
 
-  const handleView = (bookingId) => {
-    navigate(`/booking/${bookingId}`);
-  };
+  const handleView = (bookingId) =>
+    {
+      console.log("Navigating to booking ID:", bookingId);
+      navigate(`/booking/${bookingId}`);
+    };
+   
+
 
   const handleEdit = (row) => {
     navigate(`/booking/${row.id}`, { state: { booking: row, mode: 'edit' } });
@@ -367,7 +371,7 @@ console.log("data",bookingList);
               {stableSort(filteredRows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => (
-                  <TableRow key={row.id} hover>
+                  <TableRow key={row.bookingId} hover>
                     <TableCell>{page * rowsPerPage + index + 1}</TableCell>
                     <TableCell>{row.orderby}</TableCell>
                     <TableCell>{row.date}</TableCell>
@@ -381,7 +385,7 @@ console.log("data",bookingList);
                         <IconButton
                           size="small"
                           color="info"
-                          onClick={() => handleView(row)}
+                          onClick={() => handleView(row.bookingId)}
                           title="View"
                         >
                           <VisibilityIcon fontSize="small" />

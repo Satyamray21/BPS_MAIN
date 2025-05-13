@@ -288,6 +288,7 @@ export const getBookingStatusList = async (req, res) => {
       toName: b.receiverName || 'N/A',
       drop: b.endStation?.stationName || 'N/A',
       contact: b.mobile || 'N/A',
+      bookingId:b.bookingId,
       action: {
         view: `/bookings/${b.bookingId}`,
         edit: `/bookings/edit/${b.bookingId}`,

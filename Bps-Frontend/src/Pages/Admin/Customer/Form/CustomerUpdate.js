@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box, Typography, Paper, Grid, TextField, Button, Divider, Avatar, Card, CardContent
+  Box, Typography, Paper, Grid, TextField, Button, Divider, Avatar, Card, CardContent,MenuItem
 } from '@mui/material';
-import { Person, Home, InsertDriveFile, Save, ArrowBack } from '@mui/icons-material';
+import { Person, Home, InsertDriveFile, Save, ArrowBack} from '@mui/icons-material';
 import { useDispatch, useSelector } from 'react-redux';
 import { viewCustomerById, updateCustomer } from '../../../../features/customers/customerSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'; // You may need to use Axios or Fetch to handle the file upload
-
+import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
 const EditableTextField = ({ label, name, value, onChange }) => (
   <Grid item xs={12} sm={6} md={4}>
     <TextField
@@ -46,7 +46,7 @@ const CustomerUpdate = () => {
   const navigate = useNavigate();
   const { customerId } = useParams();
   const { form: customerData, loading } = useSelector(state => state.customers);
-
+  const { states, cities } = useSelector((state) => state.location);
   const [form, setForm] = useState({
     firstName: '', middleName: '', lastName: '',
     contactNumber: '', email: '',
@@ -58,6 +58,20 @@ const CustomerUpdate = () => {
     dispatch(viewCustomerById(customerId));
   }, [dispatch, customerId]);
 
+  // Fetch states on mount
+      useEffect(() => {
+          dispatch(fetchStates());
+      }, [dispatch]);
+  
+      // Fetch cities when state changes
+      useEffect(() => {
+          if (form.state) {
+              dispatch(fetchCities(form.state));
+          } else {
+              dispatch(clearCities());
+          }
+      }, [form.state, dispatch]);
+  
   useEffect(() => {
     if (customerData) {
       setForm({
@@ -199,8 +213,82 @@ const CustomerUpdate = () => {
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
               <EditableTextField name="address" label="Address" value={form.address} onChange={handleChange} />
-              <EditableTextField name="state" label="State" value={form.state} onChange={handleChange} />
-              <EditableTextField name="city" label="City" value={form.city} onChange={handleChange} />
+             <Grid item xs={12} sm={6} md={4}>
+                                             <TextField
+                                                 select
+                                                 label="State"
+                                                 name="state"
+                                                 value={form.state}
+                                                 onChange={(e) => {
+                                                     const selectedState = e.target.value;
+                                                     setForm(prev => ({
+                                                         ...prev,
+                                                         state: selectedState,
+                                                         city: '',
+                                                     }));
+                                                     dispatch(fetchCities(selectedState));
+                                                 }}
+                                                 fullWidth
+                                                 variant="outlined"
+                                                 InputLabelProps={{ style: { fontWeight: 600 } }}
+                                                 sx={{
+                                                      minWidth:250,
+                                                     '& .MuiOutlinedInput-root': {
+                                                         borderRadius: 2,
+                                                         backgroundColor: '#fff',
+                                                         '&:hover fieldset': {
+                                                             borderColor: '#1976d2',
+                                                         },
+                                                         '&.Mui-focused fieldset': {
+                                                             borderColor: '#1976d2',
+                                                             boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)'
+                                                         }
+                                                     },
+                                                     mb: 2
+                                                 }}
+                                             >
+                                                 {Array.isArray(states) && states.map((state) => (
+                                                     <MenuItem key={state} value={state}>
+                                                         {state}
+                                                     </MenuItem>
+                                                 ))}
+                                             </TextField>
+                                         </Grid>
+             
+                                         {/* City Dropdown */}
+                                         <Grid item xs={12} sm={6} md={4}>
+                                             <TextField
+                                                 select
+                                                 label="City"
+                                                 name="city"
+                                                 value={form.city}
+                                                 onChange={handleChange}
+                                                 fullWidth
+                                                 variant="outlined"
+                                                 InputLabelProps={{ style: { fontWeight: 600 } }}
+                                                 sx={{
+                                                     minWidth:250,
+                                                     '& .MuiOutlinedInput-root': {
+                                                         borderRadius: 2,
+                                                         backgroundColor: '#fff',
+                                                         '&:hover fieldset': {
+                                                             borderColor: '#1976d2',
+                                                         },
+                                                         '&.Mui-focused fieldset': {
+                                                             borderColor: '#1976d2',
+                                                             boxShadow: '0 0 0 2px rgba(25, 118, 210, 0.2)'
+                                                         }
+                                                     },
+                                                     mb: 2
+                                                 }}
+                                             >
+                                                 {Array.isArray(cities) && cities.map((city) => (
+                                                     <MenuItem key={city} value={city}>
+                                                         {city}
+                                                     </MenuItem>
+                                                 ))}
+                                             </TextField>
+                                         </Grid>
               <EditableTextField name="district" label="District" value={form.district} onChange={handleChange} />
               <EditableTextField name="pincode" label="Pincode" value={form.pincode} onChange={handleChange} />
             </Grid>

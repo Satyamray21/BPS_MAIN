@@ -333,21 +333,33 @@ const EditDriver = () => {
                   {/* Driver Photo Upload */}
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" fontWeight={600}>Driver Photo</Typography>
-                    <Avatar src={form.driverPhoto} variant="rounded" sx={{ width: 100, height: 100, mt: 1 }} />
+                    <Avatar src={form.driverPhoto || '/placeholder.png'}
+                     variant="rounded" 
+                    sx={{ width: 100, height: 100, mt: 1 }} 
+                    onError={(e) => {
+                                          e.target.src = '/placeholder.png';
+                                          console.error('Failed to load Driver photo:', form.driverPhoto);
+                                        }}
+                     />
                     <Button
                       variant="outlined"
                       sx={{ mt: 1 }}
-                      onClick={() => document.getElementById('driverPhotoInput').click()}
+                      onClick={() => document.getElementById('driverPhotoFileInput').click()}
                     >
                       {form.driverPhoto ? 'Change Photo' : 'Upload Photo'}
                     </Button>
                     <input
-                      id="driverPhotoInput"
+                      id="driverPhotoFileInput"
                       type="file"
                       accept="image/*"
                       style={{ display: 'none' }}
-                      onChange={(e) => handleImageChange(e, 'driverPhoto')}
+                      onChange={(e) => handleImageChange(e, 'driverProfilePhoto')}
                     />
+                    {form.driverPhoto && (
+                                        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                                          Current: {form.driverPhoto.split('/').pop()}
+                                        </Typography>
+                                      )}
                   </Grid>
                 </Grid>
               </CardContent>

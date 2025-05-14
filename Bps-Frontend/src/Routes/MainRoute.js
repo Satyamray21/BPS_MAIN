@@ -67,7 +67,7 @@ const MainRoute = () => {
                 <Route path='/driver' element={<DriverCard />} />
                 <Route path='/driverform' element={<DriverForm />} />
                 <Route path='/viewdriver/:driverId' element={<ViewDriver />} />
-                <Route path="/editdriver/:id" element={<EditDriver />} />
+                <Route path="/editdriver/:driverId" element={<EditDriver />} />
 
                 {/*Booking Routing */}
                 <Route path='/booking' element={<BookingCard />} />

@@ -31,8 +31,13 @@ const driverSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    distinct:{
-        type:String
+    district:{
+        type:String,
+        
+    },
+    pincode:{
+        type:String,
+        
     },
     state:{
         type:String,

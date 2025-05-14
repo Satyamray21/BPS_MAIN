@@ -202,7 +202,9 @@ const DriverCard = () => {
             dispatch(deleteDriver(driverId));
         }
     }
-
+const handleEdit = (driverId) => {
+    navigate(`/editdriver/${driverId}`)
+  }
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
     const cardData = [
@@ -312,7 +314,7 @@ const DriverCard = () => {
                                         <TableCell>{row.contactNumber}</TableCell>
                                         <TableCell>
                                             <Box sx={{ display: 'flex', gap: 1 }}>
-                                                <IconButton size="small" color="primary" onClick={() => navigate(`/editdriver/${row.driverid}`)}>
+                                                <IconButton size="small" color="primary"  onClick={() => handleEdit(row.driverId)}>
                                                     <EditIcon fontSize="small" />
                                                 </IconButton>
                                                 <IconButton size="small" color="info" onClick={() => handleView(row.driverId)}>

@@ -187,7 +187,7 @@ const ViewDriver = () => {
                                     <Grid item xs={12} sm={6}>
                                         <TextField
                                             label="ID Proof"
-                                            value={driver.idProofPhoto || ''}
+                                            value={driver.idProof || ''}
                                             variant="outlined"
                                             fullWidth
                                             disabled
@@ -196,7 +196,7 @@ const ViewDriver = () => {
                                     <Grid item xs={12} sm={6}>
                                         <Typography><strong>ID Photo:</strong></Typography>
                                         <img
-                                            src={driver.idPhotoProfileUrl}
+                                            src={driver.idPhoto}
                                             alt="ID Proof"
                                             width={150}
                                             style={{ borderRadius: 8, marginTop: 8 }}
@@ -205,7 +205,7 @@ const ViewDriver = () => {
                                     <Grid item xs={12} sm={6}>
                                         <Typography><strong>Driver Photo:</strong></Typography>
                                         <img
-                                            src={driver.driverProfilePhotoUrl}
+                                            src={driver.driverPhoto}
                                             alt="Driver"
                                             width={150}
                                             style={{ borderRadius: 8, marginTop: 8 }}

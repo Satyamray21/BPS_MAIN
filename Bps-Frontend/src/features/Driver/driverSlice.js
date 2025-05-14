@@ -160,6 +160,25 @@ export const updateStatus = createAsyncThunk(
     }
   }
 )
+export const updateDriver = createAsyncThunk(
+  'customer/updatedDriver',
+  async ({ driverId, data }, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(
+        `${BASE_URL}/update/${driverId}`,
+        data,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+      return response.data.message;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
 const initialState = {
     list:[],
     totalCount:0,
@@ -357,13 +376,28 @@ const driverSlice =  createSlice(
                   state.error=false
               })
               .addCase(viewDriverById.fulfilled,(state,action)=>{
-                console.log("Payload received in viewDriverById:", action.payload);
-                state.loading=false;
-                state.viewedDriver = action.payload;
-                state.form={
-                  ...state.form,
-                  ...action.payload
-                }
+                 state.loading = false;
+        const payload = action.payload;
+        state.form = {
+          firstName: payload.firstName || '',
+          middleName: payload.middleName || '',
+          lastName: payload.lastName || '',
+          contactNumber: payload.contactNumber || '',
+          emailId: payload.emailId || '',
+          address: payload.address || '',
+          state: payload.state || '',
+          city: payload.city || '',
+          district: payload.district || '',
+          pincode: payload.pincode || '',
+          idProof: payload.idProof || '',
+          dlNumber:payload.dlNumber || '',
+          idPhoto: payload.idProofPhoto
+            ? `http://localhost:8000/${payload.idProofPhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null,
+          driverPhoto: payload.driverProfilePhoto
+            ? `http://localhost:8000/${payload.driverProfilePhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+            : null
+        }
               })
               .addCase(viewDriverById.rejected,(state,action)=>{
                 state.loading=false;
@@ -375,12 +409,44 @@ const driverSlice =  createSlice(
                 state.error=null
               })
               .addCase(updateStatus.fulfilled, (state, action) => {
-                state.loading = false;
-                const updatedDriver = action.payload;
-                state.list = state.list.map((driver) => 
-                  driver.driverId === updatedDriver.driverId ? updatedDriver : driver
-                );
-              })
+                      state.loading = false;
+                      state.status = 'succeeded';
+                      state.error = null;
+              
+                      // Update customer in list
+                      const updatedCustomer = action.payload;
+                      state.list = state.list.map(customer =>
+                        customer.customerId === updatedCustomer.customerId ? updatedCustomer : customer
+                      );
+              
+                      // Update viewed customer if it's the same one
+                      if (state.viewedCustomer?.customerId === updatedCustomer.customerId) {
+                        state.viewedCustomer = updatedCustomer;
+                      }
+              
+                      // Update form fields
+                      const payload = action.payload;
+                      state.form = {
+                        firstName: payload.firstName || '',
+                        middleName: payload.middleName || '',
+                        lastName: payload.lastName || '',
+                        contactNumber: payload.contactNumber || '',
+                        emailId: payload.emailId || '',
+                        address: payload.address || '',
+                        state: payload.state || '',
+                        city: payload.city || '',
+                        district: payload.district || '',
+                        pincode: payload.pincode || '',
+                        idProof: payload.idProof || '',
+                        dlNumber:payload.dlNumber || '',
+                        idPhoto: payload.idProofPhoto
+                          ? `http://localhost:8000/${payload.idProofPhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+                          : null,
+                        driverPhoto: payload.driverProfilePhoto
+                          ? `http://localhost:8000/${payload.driverProfilePhoto.replace(/\\/g, '/').replace(/^\/+/g, '')}`
+                          : null
+                      };
+                    })
               
               .addCase(updateStatus.rejected,(state,action)=>{
                 state.loading=false;

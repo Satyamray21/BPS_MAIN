@@ -5,7 +5,7 @@ import {
   TextField, Button, Box, Typography, Grid,
   Paper, Card, CardContent, Divider, Avatar
 } from '@mui/material';
-import { InsertDriveFile } from '@mui/icons-material';
+import { InsertDriveFile,Save, ArrowBack } from '@mui/icons-material';
 import { updateDriver, viewDriverById } from '../../../../features/Driver/driverSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
@@ -124,9 +124,24 @@ const EditDriver = () => {
           <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             Driver Details - {driverId}
           </Typography>
-          <Button variant="contained" onClick={() => navigate(-1)}>
-            Back
-          </Button>
+          <Box>
+                      <Button
+                        variant="outlined"
+                        startIcon={<ArrowBack />}
+                        onClick={() => navigate(-1)}
+                        sx={{ mr: 2 }}
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        variant="contained"
+                        startIcon={<Save />}
+                        onClick={handleSubmit}
+                        disabled={loading}
+                      >
+                        {loading ? 'Saving...' : 'Save'}
+                      </Button>
+                    </Box>
         </Box>
 
         <Grid container spacing={3}>
@@ -140,16 +155,16 @@ const EditDriver = () => {
                 <Divider sx={{ mb: 3 }} />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={4}>
-                    <TextField label="First Name" name="firstName" value={form.firstName} fullWidth  />
+                    <TextField label="First Name" name="firstName" value={form.firstName} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={4}>
-                    <TextField label="Last Name" name="lastName" value={form.lastName} fullWidth  />
+                    <TextField label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="Contact" name="contactNumber" value={form.contactNumber} fullWidth  />
+                    <TextField label="Contact" name="contactNumber" value={form.contactNumber} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="Email" name="email" value={form.email} fullWidth  />
+                    <TextField label="Email" name="email" value={form.email} onChange={handleChange} fullWidth  />
                   </Grid>
                 </Grid>
               </CardContent>
@@ -166,19 +181,19 @@ const EditDriver = () => {
                 <Divider sx={{ mb: 3 }} />
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
-                    <TextField label="Address" name="address" value={form.address} fullWidth disabled />
+                    <TextField label="Address" name="address" value={form.address} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="State" name="state" value={form.state} fullWidth disabled />
+                    <TextField label="State" name="state" value={form.state} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="City" name="city" value={form.city} fullWidth disabled />
+                    <TextField label="City" name="city" value={form.city} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="District" name="district" value={form.district} fullWidth disabled />
+                    <TextField label="District" name="district" value={form.district} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="Pincode" name="pincode" value={form.pincode} fullWidth disabled />
+                    <TextField label="Pincode" name="pincode" value={form.pincode} onChange={handleChange} fullWidth  />
                   </Grid>
                 </Grid>
               </CardContent>
@@ -195,10 +210,10 @@ const EditDriver = () => {
                 <Divider sx={{ mb: 3 }} />
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="DL Number" name="dlNumber" value={form.dlNumber} fullWidth disabled />
+                    <TextField label="DL Number" name="dlNumber" value={form.dlNumber} onChange={handleChange} fullWidth  />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                    <TextField label="ID Proof" name="idProof" value={form.idProof} fullWidth disabled />
+                    <TextField label="ID Proof" name="idProof" value={form.idProof} onChange={handleChange} fullWidth  />
                   </Grid>
                 </Grid>
               </CardContent>

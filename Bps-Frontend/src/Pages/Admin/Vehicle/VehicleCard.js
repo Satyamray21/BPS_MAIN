@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
@@ -31,46 +31,16 @@ import {
     LocalShipping as LocalShippingIcon,
 } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
+import {useDispatch,useSelector} from 'react-redux';
+import {getAvailableVehiclesCount,getDeactivatedVehiclesCount,getBlacklistedVehiclesCount,getTotalVehiclesCount,
+    getTotalVehiclesList,getBlacklistedVehiclesList,getAvailableVehiclesList,getDeactivatedVehicles
+} from '../../../features/vehicle/vehicleSlice';
 
-const cardData = [
-    {
-        id: 1,
-        title: "Available Vehicle",
-        value: "0",
-        duration: "NaN% (30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 2,
-        title: "Totle Vehicle ",
-        value: "0",
-        duration: "NaN% (30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 3,
-        title: "Deacive Vehicle",
-        value: "0",
-        duration: "(30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 4,
-        title: "Blacklisted Vehicle",
-        value: "0",
-        duration: "(30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-];
 
-const createData = (id, adminId, name, contact) => ({
-    id,
-    adminId,
-    name,
-    contact,
-});
 
-const rows = [];
+
+
+
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -113,14 +83,32 @@ const VehicleCard = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState("");
+    const [vehicleRows,setVehicleRows] = useState([])
+     const [selectedList, setSelectedList] = useState('available');
 
+    const dispatch = useDispatch();
+    const {list:vehicleList,availableCount,
+    deactiveCount,
+    blacklistedCount,
+    totalCount} = useSelector(state => state.vehicles);
+    useEffect(()=>{
+        if(vehicleList)
+        {
+            setVehicleRows(vehicleList);
+        }
+    },[vehicleList]);
+    useEffect(()=>{
+        dispatch(getAvailableVehiclesCount());
+        dispatch(getBlacklistedVehiclesCount());
+        dispatch(getDeactivatedVehiclesCount());
+        dispatch(getTotalVehiclesCount());
+       // dispatch(getAvailableVehiclesList());
+    },[dispatch])
     const handleAdd = () => {
         navigate("/vehicleform");
     };
 
-    const handleCardClick = (cardId) => {
-        setActiveCard(activeCard === cardId ? null : cardId);
-    };
+    
 
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === "asc";
@@ -140,12 +128,69 @@ const VehicleCard = () => {
         setPage(0);
     };
 
-    const filteredRows = rows.filter(
-        (row) =>
-            row.adminId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            row.contact.includes(searchTerm)
-    );
+    useEffect(() => {
+            switch (selectedList) {
+                case 'total':
+                    dispatch(getTotalVehiclesList());
+                    break;
+                case 'available':
+                    dispatch(getAvailableVehiclesList());
+                    break;
+                case 'blacklisted':
+                    dispatch(getBlacklistedVehiclesList());
+                    break;
+                case 'deactivated':
+                    dispatch(getDeactivatedVehicles());
+                    break;
+                default:
+                    break;
+            }
+        }, [selectedList, dispatch]); // re-run when selectedList changes
+    
+        const handleCardClick = (type) => {
+            setSelectedList(type); // triggers useEffect to auto-fetch
+        };
+        const cardData = [
+    {
+        id: 1,
+        title: "Available Vehicle",
+        type:"available",
+        value: availableCount,
+        duration: "NaN% (30 Days)",
+        icon: <LocalShippingIcon fontSize="large" />,
+    },
+    {
+        id: 2,
+        title: "Total Vehicle ",
+        type:"total",
+        value: totalCount,
+        duration: "NaN% (30 Days)",
+        icon: <LocalShippingIcon fontSize="large" />,
+    },
+    {
+        id: 3,
+        title: "Deactivated Vehicle",
+        type:"deactivated",
+        value: deactiveCount,
+        duration: "(30 Days)",
+        icon: <LocalShippingIcon fontSize="large" />,
+    },
+    {
+        id: 4,
+        title: "Blacklisted Vehicle",
+        type:"blacklisted",
+        value: blacklistedCount,
+        duration: "(30 Days)",
+        icon: <LocalShippingIcon fontSize="large" />,
+    },
+];
+    const filteredRows = vehicleRows.filter(
+    (row) =>
+        row.vehicleModel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.ownedBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.currentLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
 
@@ -186,7 +231,7 @@ const VehicleCard = () => {
                         sx={{ minWidth: 220, flex: 1, display: "flex", borderRadius: 2 }}
                     >
                         <Card
-                            onClick={() => handleCardClick(card.id)}
+                            onClick={() => handleCardClick(card.type)}
                             sx={{
                                 flex: 1,
                                 cursor: "pointer",
@@ -304,9 +349,9 @@ const VehicleCard = () => {
                                 .map((row, index) => (
                                     <TableRow key={row.id} hover>
                                         <TableCell>{page * rowsPerPage + index + 1}</TableCell>
-                                        <TableCell>{row.adminId}</TableCell>
-                                        <TableCell>{row.name}</TableCell>
-                                        <TableCell>{row.contact}</TableCell>
+                                        <TableCell>{row.location}</TableCell>
+                                        <TableCell>{row.ownedBy}</TableCell>
+                                        <TableCell>{row.vehicleModel}</TableCell>
                                         <TableCell>
                                             <Box sx={{ display: "flex", gap: 1 }}>
                                                 <IconButton size="small" color="primary">

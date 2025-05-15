@@ -21,7 +21,7 @@ export const addVehicles = createAsyncThunk(
 export const getAvailableVehiclesCount= createAsyncThunk(
     'getAvailableVehiclesCount/vehicle', async(_,{rejectWithValue})=>{
         try{
-            const res = await axios.get(`${BASE_URL}/total-vehicles`);
+            const res = await axios.get(`${BASE_URL}/available-vehicles`);
             return {availableCount:res.data.message.availableVehicles};
         }
         catch(err)
@@ -222,13 +222,13 @@ const vehicleSlice= createSlice(
       })
 
       .addCase(getBlacklistedVehiclesList.fulfilled, (state, action) => {
-        state.blacklistedVehicles = action.payload;
+        state.list = action.payload;
       })
       .addCase(getAvailableVehiclesList.fulfilled, (state, action) => {
-        state.availableVehicles = action.payload;
+        state.list = action.payload;
       })
       .addCase(getDeactivatedVehicles.fulfilled, (state, action) => {
-        state.deactivatedVehicles = action.payload;
+        state.list = action.payload;
       });
   }
     

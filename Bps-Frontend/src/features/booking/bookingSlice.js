@@ -95,6 +95,19 @@ export const viewBookingById = createAsyncThunk(
     
   }
 )
+export const updateBookingById  = createAsyncThunk(
+  'booking/update',async(bookingId,thunkApi)=>{
+    try{
+       
+      const res = await axios.put(`${BASE_URL}/${bookingId}`)
+      return res.data;
+    }
+    catch(err)
+    {
+      return thunkApi.rejectWithValue(err.response?.data?.message || 'failed to update booking')
+    }
+  }
+)
 const initialState = {
   list: [],
   requestCount: 0,
@@ -229,6 +242,22 @@ const bookingSlice = createSlice({
       .addCase(viewBookingById.rejected,(state)=>{
         state.loading=false;
         state.error=null
+      })
+      .addCase(updateBookingById.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(updateBookingById.fulfilled,(state,action)=>{
+        state.status='succeeded'
+        state.error=null
+        const updatedBooking = action.payload
+        const index = state.list.findIndex(booking=> booking.bookingId === updatedBooking.bookingId );
+        if(index != -1)
+        {
+           state.list[index] =  updatedBooking;
+        }
+
+        state.form = initialState.form
       })
 
     ;

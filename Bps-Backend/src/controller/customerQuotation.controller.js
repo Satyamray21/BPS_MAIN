@@ -29,6 +29,7 @@ import manageStation from "../model/manageStation.model.js";
 
 // Create Quotation Controller
 export const createQuotation = asyncHandler(async (req, res, next) => {
+  console.log("body",req.body);
   const {
     firstName,
     lastName,
@@ -161,7 +162,9 @@ export const getQuotationById = asyncHandler(async (req, res, next) => {
 // Update Quotation Controller
 export const updateQuotation = asyncHandler(async (req, res, next) => {
   const { bookingId } = req.params;
-  const updatedQuotation = await Quotation.findOneAndUpdate({bookingId},{new:true});
+  const updatedData = req.body;
+  console.log("📝 Update request body:", updatedData);
+  const updatedQuotation = await Quotation.findOneAndUpdate({bookingId},updatedData,{new:true});
   
   if (!updatedQuotation) return next(new ApiError(404, "Quotation not found"));
 
@@ -171,7 +174,7 @@ export const updateQuotation = asyncHandler(async (req, res, next) => {
 // Delete Quotation Controller
 export const deleteQuotation = asyncHandler(async (req, res, next) => {
   const { bookingId } = req.params;
-
+  
   const deletedQuotation = await Quotation.findOneAndDelete({ bookingId });
 
   if (!deletedQuotation) {

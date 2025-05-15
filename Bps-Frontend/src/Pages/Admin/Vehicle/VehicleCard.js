@@ -190,7 +190,9 @@ const VehicleCard = () => {
         row.ownedBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         row.currentLocation?.toLowerCase().includes(searchTerm.toLowerCase())
 );
-
+const handleView = (vehicleId) => {
+    navigate(`/vehicleview/${vehicleId}`);
+  }
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
 
@@ -349,13 +351,14 @@ const VehicleCard = () => {
                                 .map((row, index) => (
                                     <TableRow key={row.id} hover>
                                         <TableCell>{page * rowsPerPage + index + 1}</TableCell>
+                                        <TableCell>{row.vehicleId}</TableCell>
                                         <TableCell>{row.location}</TableCell>
                                         <TableCell>{row.ownedBy}</TableCell>
                                         <TableCell>{row.vehicleModel}</TableCell>
                                         <TableCell>
                                             <Box sx={{ display: "flex", gap: 1 }}>
                                                 <IconButton size="small" color="primary">
-                                                    <EditIcon fontSize="small" />
+                                                    <EditIcon fontSize="small" onClick={() => handleView(row.vehicleId)} />
                                                 </IconButton>
                                                 <IconButton size="small" color="error">
                                                     <DeleteIcon fontSize="small" />

@@ -115,6 +115,19 @@ export const getDeactivatedVehicles= createAsyncThunk(
         }
 )
 
+export const getVehicleById = createAsyncThunk(
+  'getVehicleById/vehicle' , async(vehicleId,thunkApi)=>{
+    try{
+      const res = await axios.get(`${BASE_URL}/vehicle/${vehicleId}`)
+      return res.data.message;
+    }
+    catch(error)
+    {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to view Vehicle");
+    }
+  }
+)
+
 const initialState = {
     list:[],
     form:{
@@ -178,7 +191,7 @@ const vehicleSlice= createSlice(
                   state.list = action.payload;
                 },
                 clearViewedVehicle:(state)=>{
-                  state.viewedStation=null;
+                  state.viewedVehicle=null;
                 }
         },
         extraReducers: (builder) => {
@@ -229,7 +242,24 @@ const vehicleSlice= createSlice(
       })
       .addCase(getDeactivatedVehicles.fulfilled, (state, action) => {
         state.list = action.payload;
-      });
+      })
+      .addCase(getVehicleById.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(getVehicleById.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.viewedVehicle=action.payload;
+        state.form={
+          ...state.form,
+          ...action.payload
+        }
+      })
+      .addCase(getVehicleById.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload;
+      })
+      ;
   }
     
 })

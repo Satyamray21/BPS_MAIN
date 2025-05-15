@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import {
     Box,
     Button,
@@ -9,7 +9,8 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-
+import { useDispatch,useSelector } from "react-redux";
+import {addVehicles}  from '../../../../features/vehicle/vehicleSlice'
 const years = Array.from(
     { length: 30 },
     (_, i) => new Date().getFullYear() - i
@@ -27,8 +28,8 @@ const validationSchema = Yup.object({
     purchasedFrom: Yup.string().required("Required"),
     PurchasedUnder: Yup.string().required("Required"),
     purchasePrice: Yup.number().required("Required"),
-    deprecidepreciationPercentationPercent: Yup.number().required("Required"),
-    depreciationValue: Yup.number().required("Required"),
+    depreciation: Yup.number().required("Required"),
+    
     currentValue: Yup.number().required("Required"),
 
     currentInsuranceProvider: Yup.string().required("Required"),
@@ -49,7 +50,7 @@ const validationSchema = Yup.object({
 
     firstRegValidUpto: Yup.date().required("Required"),
     renewalDate: Yup.date(),
-    renewalrenewalValidUptoValidUpto: Yup.date().required("Required").min(
+    renewalValidUpto: Yup.date().required("Required").min(
         Yup.ref("renewalDate"),
         "Must be after renewal date"
     ),
@@ -58,6 +59,8 @@ const validationSchema = Yup.object({
 });
 
 const VehicleForm = () => {
+    const dispatch = useDispatch();
+
     const formik = useFormik({
         initialValues: {
             registrationNumber: "",
@@ -71,8 +74,8 @@ const VehicleForm = () => {
             purchasedFrom: "",
             PurchasedUnder: "",
             purchasePrice: "",
-            depreciationPercent: "",
-            depreciationValue: "",
+            depreciation: "",
+            
             currentValue: "",
 
             currentInsuranceProvider: "",
@@ -92,9 +95,20 @@ const VehicleForm = () => {
             addcomment: "",
         },
         validationSchema,
-        onSubmit: (values) => {
-            alert(JSON.stringify(values, null, 2));
-        },
+        onSubmit: async (values) => {
+  try {
+    await dispatch(addVehicles(values)).unwrap();
+    console.log("Vehicle created successfully",values);
+    // Optional: redirect or trigger a refresh
+    // navigate('/vehicles');
+    formik.resetForm();
+  } catch (error) {
+    console.log("Error while creating Vehicle", error);
+  }
+}
+
+
+        
     });
 
     return (
@@ -161,31 +175,31 @@ const VehicleForm = () => {
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                             label="Make/Model"
-                            name="makeModel"
+                            name="vehicleModel"
                             fullWidth
-                            value={formik.values.makeModel}
+                            value={formik.values.vehicleModel}
                             onChange={formik.handleChange}
                             error={
-                                formik.touched.makeModel && Boolean(formik.errors.makeModel)
+                                formik.touched.vehicleModel && Boolean(formik.errors.vehicleModel)
                             }
-                            helperText={formik.touched.makeModel && formik.errors.makeModel}
+                            helperText={formik.touched.vehicleModel && formik.errors.vehicleModel}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
                             select
                             label="Year of Manufacture"
-                            name="yearOfManufacture"
+                            name="manufactureYear"
                             fullWidth
-                            value={formik.values.yearOfManufacture}
+                            value={formik.values.manufactureYear}
                             onChange={formik.handleChange}
                             error={
-                                formik.touched.yearOfManufacture &&
-                                Boolean(formik.errors.yearOfManufacture)
+                                formik.touched.manufactureYear &&
+                                Boolean(formik.errors.manufactureYear)
                             }
                             helperText={
-                                formik.touched.yearOfManufacture &&
-                                formik.errors.yearOfManufacture
+                                formik.touched.manufactureYear &&
+                                formik.errors.manufactureYear
                             }
                         >
                             {years.map((year) => (
@@ -225,18 +239,18 @@ const VehicleForm = () => {
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                             label="Date of Purchase"
-                            name="dateOfPurchase"
+                            name="dateofPurchase"
                             type="date"
                             InputLabelProps={{ shrink: true }}
                             fullWidth
-                            value={formik.values.dateOfPurchase}
+                            value={formik.values.dateofPurchase}
                             onChange={formik.handleChange}
                             error={
-                                formik.touched.dateOfPurchase &&
-                                Boolean(formik.errors.dateOfPurchase)
+                                formik.touched.dateofPurchase &&
+                                Boolean(formik.errors.dateofPurchase)
                             }
                             helperText={
-                                formik.touched.dateOfPurchase && formik.errors.dateOfPurchase
+                                formik.touched.dateofPurchase && formik.errors.dateofPurchase
                             }
                         />
                     </Grid>
@@ -252,9 +266,9 @@ const VehicleForm = () => {
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                             label="Purchased Under"
-                            name="purchasedUnder"
+                            name="PurchasedUnder"
                             fullWidth
-                            value={formik.values.purchasedUnder}
+                            value={formik.values.PurchasedUnder}
                             onChange={formik.handleChange}
                         />
                     </Grid>
@@ -271,10 +285,10 @@ const VehicleForm = () => {
                     <Grid size={{ xs: 12, sm: 4 }}>
                         <TextField
                             label="% of Depreciation"
-                            name="depreciationPercent"
+                            name="depreciation"
                             type="number"
                             fullWidth
-                            value={formik.values.depreciationPercent}
+                            value={formik.values.depreciation}
                             onChange={formik.handleChange}
                         />
                     </Grid>

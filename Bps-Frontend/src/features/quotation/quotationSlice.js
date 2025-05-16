@@ -1,47 +1,47 @@
-import {createSlice,createAsyncThunk} from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const BASE_URL='http://localhost:8000/api/v2/quotation'
+const BASE_URL = 'http://localhost:8000/api/v2/quotation'
 
 export const createBooking = createAsyncThunk(
 
-    'bookings/createBooking',async(data,{rejectWithValue})=>{
-      
-        try{
-            const res = await axios.post(`${BASE_URL}`,data)
-            return res.data.data
-        }
-        catch(err)
-        {
-          
-          console.log('Error creating booking:', err.response?.data || err.message);
-            return rejectWithValue(err.response?.data?.message || err.message);
-        }
+  'bookings/createBooking', async (data, { rejectWithValue }) => {
+
+    try {
+      const res = await axios.post(`${BASE_URL}`, data)
+      return res.data.data
     }
-)
-export const deleteBooking = createAsyncThunk(
-  '/booking/deleteBooking',async(bookingId,thunkApi)=>{
-    try{
-      const res = await axios.delete(`${BASE_URL}/delete/${bookingId}`)
-      return bookingId;
-    }
-    catch(error)
-    {
-      return  thunkApi.rejectWithValue(error.response?.data?.message || "Failed to delete the booking");
+    catch (err) {
+      console.log('Error creating booking:', err.response?.data?.message || err.message);
+      return rejectWithValue(err.response?.data?.message || err.message);
     }
   }
 )
+// quotationsSlice.js
+export const deleteBooking = createAsyncThunk(
+  'booking/deleteBooking',
+  async (bookingId, thunkApi) => {
+    try {
+      await axios.delete(`${BASE_URL}/${bookingId}`);
+      return bookingId; // This should be used to remove it from the state
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        error.response?.data?.message || "Failed to delete the booking"
+      );
+    }
+  }
+);
+
 //booking request.
 export const fetchBookingRequest = createAsyncThunk(
   'booking/bookingRequestCount',
   async (_, thunkApi) => {
     try {
       const res = await axios.get(`${BASE_URL}/booking-request-list`);
-      console.log(res.data.deliveries); // Log the response data
       return res.data.data.deliveries;
     } catch (error) {
-      console.error("API Request Failed:", error);
-      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to fetch Booking request");
+      console.error("Error in fetchBookingRequest:", error);
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Error fetching bookings");
     }
   }
 );
@@ -49,92 +49,105 @@ export const fetchBookingRequest = createAsyncThunk(
 
 //active booking.
 export const fetchActiveBooking = createAsyncThunk(
-  'booking/activeBooking', async(_,thunkApi)=>{
-    try{
+  'booking/activeBooking', async (_, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/active-list`)
-      return res.data.deliveries
-         
-      }
-
-    
-    catch(error)
-    {
-       return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Deliveries ");
+      return {
+        activeDeliveries: res.data.data.totalActiveDeliveries,
+        deliveries: res.data.data.deliveries,
+      };
+    }
+    catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Deliveries ");
     }
   }
 )
 //cancelled booking
-export const  fetchCancelledBooking = createAsyncThunk(
-  'booking.cancelledCount',async(_,thunkApi)=>{
-    try{
+export const fetchCancelledBooking = createAsyncThunk(
+  'booking.cancelledCount', async (_, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/cancelled-list`)
-      return res.data.deliveries;
+      return { cancelledCount: res.data.data.totalCancelledDeliveries }
     }
-    catch(error)
-    {
-       return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Cancelled Booking");
+    catch (error) {
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Cancelled Booking");
     }
   }
 )
 
 export const viewBookingById = createAsyncThunk(
-  '/booking/viewBookingById', async(bookingId,thunkApi)=>{
-    try{
+  '/booking/viewBookingById', async (bookingId, thunkApi) => {
+    try {
       const res = await axios.get(`${BASE_URL}/search/${bookingId}`)
-      return res.data;
+      return res?.data?.data;
     }
-    catch(err)
-    {
-      return thunkApi.rejectWithValue( err.response?.data?.message || 'f' );
+    catch (err) {
+      return thunkApi.rejectWithValue(err.response?.data?.message || 'f');
     }
-    
+
   }
 )
+
+export const updateBookingById = createAsyncThunk(
+  'booking/update',
+  async ({ bookingId, data }, thunkApi) => {
+    try {
+      const res = await axios.put(`${BASE_URL}/${bookingId}`, data);
+      return res?.data?.data;
+    } catch (err) {
+      return thunkApi.rejectWithValue(
+        err.response?.data?.message || 'Failed to update booking'
+      );
+    }
+  }
+);
+
+
 const initialState = {
   list: [],
-  
+  requestCount: 0,
+  activeDeliveriesCount: 0,
+  cancelledDeliveriesCount: 0,
 
-  form: {
-  firstName: "",
-  lastName: "",
-  startStationName: null,
-  endStation: null,
-  locality: "",
-  quotationDate: "",
-  proposedDeliveryDate: "",
-  fromCustomerName: "",
-  fromAddress: "",
-  fromState: "",
-  fromCity: "",
-  fromPincode: "",
-  toCustomerName: "",
-  toAddress: "",
-  toState: "",
-  toCity: "",
-  toPincode: "",
-  amount: "",
-  sgst: "",
-  additionalCmt: "",
-  productDetails: [
-    {
-      name: "",
-      quantity: "",
-      price: "",
-      weight: "",
-    },
-  ],
-  addComment: "",
- 
-  
-  billTotal: "",
-  
-  sgst: "",
-  
-  grandTotal: "",
-  },
+  loading: false,
+  viewedBooking: null,
   status: 'idle',
   error: null,
-  viewedbooking : null,
+
+  form: {
+    firstName: "",
+    lastName: "",
+    startStationName: null,
+    endStation: null,
+    locality: "",
+    quotationDate: "",
+    proposedDeliveryDate: "",
+    fromCustomerName: "",
+    fromAddress: "",
+    fromState: "",
+    fromCity: "",
+    fromPincode: "",
+    toCustomerName: "",
+    toAddress: "",
+    toState: "",
+    toCity: "",
+    toPincode: "",
+    amount: "",
+    sgst: "",
+    additionalCmt: "",
+    productDetails: [
+      {
+        name: "",
+        quantity: "",
+        price: "",
+        weight: "",
+      },
+    ],
+    addComment: "",
+    billTotal: "",
+    sgst: "",
+    grandTotal: "",
+  },
 };
 const quotationSlice = createSlice({
   name: 'quotation',
@@ -153,73 +166,91 @@ const quotationSlice = createSlice({
     setBooking: (state, action) => {
       state.list = action.payload;
     },
-    clearViewedBooking:(state)=>{
-      state.viewedBooking=null;
+    clearViewedBooking: (state) => {
+      state.viewedBooking = null;
     }
   },
- extraReducers: (builder) => {
+  extraReducers: (builder) => {
     builder
-    //for booking.
-    .addCase(createBooking.pending,(state)=>{
-      state.loading=true;
-      state.error=null;
-    })
-    .addCase(createBooking.fulfilled,(state,action)=>{
-      state.status='succeeded';
-      state.error=null;
-      state.list.push(action.payload);
-    })
-    .addCase(createBooking.rejected,(state,action)=>{
-      state.loading=false;
-      state.error=action.payload;
-    })
-    //for deleting
-    .addCase(deleteBooking.fulfilled,(state,action)=>{
-      state.loading=false;
-      state.list = state.list.filter(booking=>booking.bookingId !== action.payload);
-    })
-     
-    
+      //for booking.
+      .addCase(createBooking.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createBooking.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.error = null;
+        state.list.push(action.payload);
+      })
+      .addCase(createBooking.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      //for deleting
+      .addCase(deleteBooking.fulfilled, (state, action) => {
+        console.log("Deleted ID from API response:", action.payload);
+        console.log("Before deletion, list:", state.list);
 
-      // In your extraReducers section:
-.addCase(fetchBookingRequest.fulfilled, (state, action) => {
-  state.loading=false;
-    state.list = action.payload;
-  
-  
-})
+        state.loading = false;
+        state.list = state.list.filter(booking => booking.bookingId !== action.payload);
 
-    .addCase(fetchCancelledBooking.fulfilled,(state,action)=>{
-      state.loading=false;
-      state.list=action.payload
-    })
-    .addCase(fetchActiveBooking.fulfilled,(state,action)=>{
-      state.loading=false;
-      state.list=action.payload
-    })
+        console.log("After deletion, list:", state.list);
+      })
 
+      .addCase(fetchBookingRequest.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchBookingRequest.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload; // ✅ Make sure payload is an array
+        state.requestCount = action.payload?.length || 0;
+      })
+      .addCase(fetchBookingRequest.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
 
-        
+      .addCase(fetchActiveBooking.fulfilled, (state, action) => {
+        state.activeDeliveriesCount = action.payload.activeDeliveries;
+        state.list = action.payload.deliveries;
+      })
+      .addCase(fetchCancelledBooking.fulfilled, (state, action) => {
+        state.cancelledDeliveriesCount = action.payload.cancelledCount;
+        state.list = action.payload.deliveries || [];
+      })
       //view booking
-      .addCase(viewBookingById.pending,(state)=>{
-        state.loading=false;
-        state.error=null;
+      .addCase(viewBookingById.pending, (state) => {
+        state.loading = false;
+        state.error = null;
       })
       .addCase(viewBookingById.fulfilled, (state, action) => {
         state.loading = false;
-        state.viewedBooking=action.payload;
+        state.viewedBooking = action.payload;
         state.form = {
           ...state.form,
           ...action.payload
         };
       })
-      .addCase(viewBookingById.rejected,(state)=>{
-        state.loading=false;
-        state.error=null
+      .addCase(viewBookingById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
+      .addCase(updateBookingById.pending, (state) => {
+        state.loading = true;
+        state.error = null
+      })
+      .addCase(updateBookingById.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.error = null
+        const updatedBooking = action.payload
+        const index = state.list.findIndex(booking => booking.bookingId === updatedBooking.bookingId);
+        if (index !== -1) {
+          state.list[index] = updatedBooking;
+        }
 
-    ;
- }
+        state.form = initialState.form
+      })
+  }
 })
-export const { setFormField, resetForm, addBooking , setBooking,clearViewedBooking} = quotationSlice.actions;
+export const { setFormField, resetForm, addBooking, setBooking, clearViewedBooking } = quotationSlice.actions;
 export default quotationSlice.reducer;

@@ -25,6 +25,7 @@ import {
 import {
     Edit as EditIcon,
     Delete as DeleteIcon,
+    Visibility as VisibilityIcon,
     MoreVert as MoreVertIcon,
     Search as SearchIcon,
 
@@ -33,7 +34,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import {useDispatch,useSelector} from 'react-redux';
 import {getAvailableVehiclesCount,getDeactivatedVehiclesCount,getBlacklistedVehiclesCount,getTotalVehiclesCount,
-    getTotalVehiclesList,getBlacklistedVehiclesList,getAvailableVehiclesList,getDeactivatedVehicles
+    getTotalVehiclesList,getBlacklistedVehiclesList,getAvailableVehiclesList,getDeactivatedVehicles,deleteVehicle
 } from '../../../features/vehicle/vehicleSlice';
 
 
@@ -196,6 +197,12 @@ const VehicleCard = () => {
 const handleView = (vehicleId) => {
     navigate(`/vehicleview/${vehicleId}`);
   }
+  const handleDelete = (vehicleId) => {
+          if (window.confirm("Are you sure you want to delete this Vehicle ?")) {
+              
+              dispatch(deleteVehicle(vehicleId));
+          }
+      }
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
 
@@ -359,17 +366,18 @@ const handleView = (vehicleId) => {
                                         <TableCell>{row.ownedBy}</TableCell>
                                         <TableCell>{row.vehicleModel}</TableCell>
                                         <TableCell>
-                                            <Box sx={{ display: "flex", gap: 1 }}>
-                                                <IconButton size="small" color="primary">
-                                                    <EditIcon fontSize="small" onClick={() => handleView(row.vehicleId)} />
-                                                </IconButton>
-                                                <IconButton size="small" color="error">
-                                                    <DeleteIcon fontSize="small" />
-                                                </IconButton>
-                                                <IconButton size="small" color="default">
-                                                    <MoreVertIcon fontSize="small" onClick={() => handleEdit(row.vehicleId)}/>
-                                                </IconButton>
+                                            <Box>
+                                    <IconButton size="small" color="primary"  onClick={() => handleEdit(row.vehicleId)}>
+                                                                                                <EditIcon fontSize="small" />
+                                                                                            </IconButton>
+                                                                                            <IconButton size="small" color="info" onClick={() => handleView(row.vehicleId)}>
+                                                                                                <VisibilityIcon fontSize="small" />
+                                                                                            </IconButton>
+                                                                                            <IconButton size="small" color="error" onClick={() => handleDelete(row.vehicleId)}>
+                                                                                                <DeleteIcon fontSize="small" />
+                                                                                            </IconButton>
                                             </Box>
+                                            
                                         </TableCell>
                                     </TableRow>
                                 ))}

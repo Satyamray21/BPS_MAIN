@@ -145,7 +145,8 @@ export const updateVehicle = asyncHandler(async (req, res) => {
 
 // DELETE Vehicle
 export const deleteVehicle = asyncHandler(async (req, res) => {
-  const deleted = await Vehicle.findByIdAndDelete(req.params.id);
+  const { vehicleId } = req.params;
+  const deleted = await Vehicle.findOneAndDelete({vehicleId});
 
   if (!deleted) throw new ApiError(404, "Vehicle not found");
 

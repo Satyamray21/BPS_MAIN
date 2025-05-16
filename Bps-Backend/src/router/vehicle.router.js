@@ -34,7 +34,7 @@ router.get("/vehicle/:id", getVehicleById);
 router.put("/vehicle/:vehicleId",updateVehicle);
 
 
-router.delete("/vehicle/:id", deleteVehicle);
+router.delete("/vehicle/:vehicleId", deleteVehicle);
 
 router.get('/total-vehicles', getTotalVehiclesCount);
 router.get('/available-vehicles', getAvailableVehiclesCount);

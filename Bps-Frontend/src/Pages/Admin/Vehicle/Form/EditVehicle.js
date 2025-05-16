@@ -20,7 +20,43 @@ const years = Array.from(
 
 // Function to generate random date within a range
 
+const validationSchema = Yup.object({
+  registrationNumber: Yup.string().required("Required"),
+  registrationDate: Yup.string().required("Required"),
+  regExpiryDate: Yup.string().required("Required"),
+  vehicleModel: Yup.string().required("Required"),
+  manufactureYear: Yup.string().required("Required"),
+  ownedBy: Yup.string().required("Required"),
+  currentLocation: Yup.string().required("Required"),
+  dateofPurchase: Yup.string().required("Required"),
+  purchasedFrom: Yup.string(),
+  PurchasedUnder: Yup.string(),
+  purchasePrice: Yup.number(),
+  depreciation: Yup.number(),
 
+  currentValue: Yup.number(),
+  currentInsuranceProvider: Yup.string(),
+  policyNumber: Yup.string(),
+  policyType: Yup.string(),
+  policyStartDate: Yup.date(),
+  policyEndDate: Yup.date().min(
+    Yup.ref("policyStartDate"),
+    "End date must be after start date"
+  ),
+  policyPremium: Yup.number(),
+  lastFitnessRenewalDate: Yup.date(),
+  currentFitnessValidUpto: Yup.date().min(
+    Yup.ref("lastFitnessRenewalDate"),
+    "Must be after renewal date"
+  ),
+  firstRegValidUpto: Yup.date(),
+  renewalDate: Yup.date(),
+  renewalValidUpto: Yup.date().min(
+    Yup.ref("renewalDate"),
+    "Must be after renewal date"
+  ),
+  addcomment: Yup.string(),
+});
 
 
 const EditVehicle = () => {
@@ -66,10 +102,11 @@ useEffect(() => {
 }, [viewedVehicle]);
 
 const formatDateToInput = (dateString) => {
-    if (!dateString) return "N/A";
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toISOString().split("T")[0]; // returns YYYY-MM-DD
+};
+
   const formik = useFormik({
   initialValues: initialValues ? {
     registrationNumber: initialValues.registrationNumber || '',
@@ -124,6 +161,7 @@ const formatDateToInput = (dateString) => {
     renewalValidUpto: '',
     addcomment: '',
   },
+  validationSchema,
   enableReinitialize: true,
   
   onSubmit: (values) => {

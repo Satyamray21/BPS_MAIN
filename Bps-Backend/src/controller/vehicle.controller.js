@@ -113,18 +113,35 @@ export const getVehicleById = asyncHandler(async (req, res) => {
 
 // UPDATE Vehicle (Full Details)
 export const updateVehicle = asyncHandler(async (req, res) => {
-  const {vehicleId} = req.params;
-  const updated = await Vehicle.findOneAndUpdate({vehicleId}, req.body, {
-    new: true,
-    
-  });
+  const { vehicleId } = req.params;
+  const existingVehicle = await Vehicle.findOne({ vehicleId });
 
-  if (!updated) throw new ApiError(404, "Vehicle not found");
+  if (!existingVehicle) throw new ApiError(404, "Vehicle not found");
+
+  // Check if registrationNumber is being changed
+  if (
+    req.body.registrationNumber &&
+    req.body.registrationNumber !== existingVehicle.registrationNumber
+  ) {
+    const duplicate = await Vehicle.findOne({
+      registrationNumber: req.body.registrationNumber,
+    });
+    if (duplicate) {
+      throw new ApiError(400, "Registration number already exists");
+    }
+  }
+
+  const updated = await Vehicle.findOneAndUpdate(
+    { vehicleId },
+    req.body,
+    { new: true }
+  );
 
   return res
     .status(200)
     .json(new ApiResponse(200, "Vehicle updated successfully", updated));
 });
+
 
 // DELETE Vehicle
 export const deleteVehicle = asyncHandler(async (req, res) => {

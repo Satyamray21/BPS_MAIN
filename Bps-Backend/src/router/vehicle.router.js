@@ -31,7 +31,7 @@ router.patch("/vehicles/:vehicleId/status", updateVehicleStatus);
 router.get("/vehicle/:id", getVehicleById);
 
 
-router.put("/vehicle/:id", parseFormData,updateVehicle);
+router.put("/vehicle/:vehicleId",updateVehicle);
 
 
 router.delete("/vehicle/:id", deleteVehicle);

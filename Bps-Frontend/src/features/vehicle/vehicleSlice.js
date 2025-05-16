@@ -127,6 +127,21 @@ export const getVehicleById = createAsyncThunk(
     }
   }
 )
+export const updateVehicleById = createAsyncThunk(
+  'updateVechicle/vehicle',async({vehicleId,data},thunkApi)=>{
+
+      try{
+        const res = await axios.put(`${BASE_URL}/vehicle/${vehicleId}`,data);
+        return res.data.message
+      }
+      catch(error)
+      {
+        console.error("Update error:", error.response?.data || error.message);
+        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to update data");
+      }
+
+    }
+)
 
 const initialState = {
     list:[],
@@ -258,6 +273,26 @@ const vehicleSlice= createSlice(
       .addCase(getVehicleById.rejected,(state,action)=>{
         state.loading=false;
         state.error=action.payload;
+      })
+      .addCase(updateVehicleById.pending,(state)=>{
+        state.loading=true;
+        state.error=null;
+      })
+      .addCase(updateVehicleById.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.error=null;
+        const updatedVechicle = action.payload;
+        const index = state.list.findIndex(vechile=>vechile.vehicleId === updatedVechicle.vehicleId) 
+        if(index !== -1)
+        {
+          state.list[index]=updatedVechicle
+        }
+        state.form = initialState.form;
+        state.viewedVehicle=null;
+      })
+      .addCase(updateVehicleById.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
       })
       ;
   }

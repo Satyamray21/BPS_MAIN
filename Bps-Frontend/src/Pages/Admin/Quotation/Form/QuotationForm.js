@@ -1,4 +1,4 @@
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { Formik, Form, Field, FieldArray } from "formik";
 import {
   Box,
@@ -21,8 +21,9 @@ import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
 import { createBooking } from "../../../../features/quotation/quotationSlice";
-import {fetchStations} from '../../../../features/stations/stationSlice'
-const toPay = ['pay', 'paid','none'];
+import { fetchStations } from '../../../../features/stations/stationSlice'
+import CustomerSearch from "../../../../Components/CustomerSearch";
+const toPay = ['pay', 'paid', 'none'];
 
 const initialValues = {
   firstName: "",
@@ -45,37 +46,37 @@ const initialValues = {
   amount: "",
   sgst: "",
   additionalCmt: "",
- productDetails: [
-  {
-    name: "",
-    quantity: "",
-    weight: "",
-    price: "",
-    topay: "none",
-  },
-],
+  productDetails: [
+    {
+      name: "",
+      quantity: "",
+      weight: "",
+      price: "",
+      topay: "none",
+    },
+  ],
 
   addComment: "",
- 
-  
+
+
   billTotal: "",
-  
+
   stax: "",
-  
+
   grandTotal: "",
 };
 
 const QuotationForm = () => {
-    const [senderCities, setSenderCities] = React.useState([]);
-      const [receiverCities, setReceiverCities] = React.useState([]);
-     
-      const dispatch = useDispatch();
-      const { states, cities } = useSelector((state) => state.location);
-      const { list: stations } = useSelector((state) => state.stations);
-      useEffect(() => {
-          dispatch(fetchStates());
-          dispatch(fetchStations());
-        }, [dispatch]);
+  const [senderCities, setSenderCities] = React.useState([]);
+  const [receiverCities, setReceiverCities] = React.useState([]);
+
+  const dispatch = useDispatch();
+  const { states, cities } = useSelector((state) => state.location);
+  const { list: stations } = useSelector((state) => state.stations);
+  useEffect(() => {
+    dispatch(fetchStates());
+    dispatch(fetchStations());
+  }, [dispatch]);
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: "",
@@ -91,13 +92,13 @@ const QuotationForm = () => {
       <Formik
         initialValues={initialValues}
         onSubmit={async (values, formikHelpers) => {
-                  try {
-                    await dispatch(createBooking(values)).unwrap();
-                    formikHelpers.resetForm();
-                  } catch (error) {
-                    console.log("Error while adding booking", error);
-                  }
-                }}
+          try {
+            await dispatch(createBooking(values)).unwrap();
+            formikHelpers.resetForm();
+          } catch (error) {
+            console.log("Error while adding booking", error);
+          }
+        }}
       >
         {({ values, handleChange, setFieldValue }) => {
           const handleUpdate = (index) => {
@@ -122,16 +123,16 @@ const QuotationForm = () => {
 
           return (
             <Form>
-                <EffectSyncCities values={values} dispatch={dispatch} setSenderCities={setSenderCities}
-  setReceiverCities={setReceiverCities}/>
+              <EffectSyncCities values={values} dispatch={dispatch} setSenderCities={setSenderCities}
+                setReceiverCities={setReceiverCities} />
               <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
-                <Grid size={{xs:12}}>
+                <Grid size={{ xs: 12 }}>
                   <Typography variant="h6" fontWeight="bold">
                     Edit Customer Quotation
                   </Typography>
                 </Grid>
                 <Grid container spacing={2}>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -142,13 +143,13 @@ const QuotationForm = () => {
                     >
                       {stations.map((station) => (
                         <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
-                                                    {station.stationName}
-                          
+                          {station.stationName}
+
                         </MenuItem>
                       ))}
                     </TextField>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -159,108 +160,75 @@ const QuotationForm = () => {
                     >
                       {stations.map((station) => (
                         <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
-                                                    {station.stationName}
-                          
+                          {station.stationName}
+
                         </MenuItem>
                       ))}
                     </TextField>
                   </Grid>
 
-                  <Grid container spacing={2}>
-                    <Grid size={{xs:12, sm:6}}>
+                  <Grid container columnSpacing={2} rowSpacing={2}>
+                    <Grid xs={12} sm={6}>
                       <DatePicker
                         label="Booking Date"
                         value={values.quotationDate}
                         onChange={(val) => setFieldValue("quotationDate", val)}
                         minDate={new Date()}
-                        renderInput={(params) => (
-                          <TextField fullWidth {...params} name="quotationDate" />
-                        )}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            name: "quotationDate",
+                            error: false,
+                            InputProps: {
+                              sx: { width: 490 }, // Increase height here
+                            },
+                          },
+                        }}
                       />
                     </Grid>
-                    <Grid size={{xs:12, sm:6}}>
+                    <Grid xs={12} sm={6}>
                       <DatePicker
                         label="Proposed Delivery Date"
                         value={values.proposedDeliveryDate}
                         onChange={(val) => setFieldValue("proposedDeliveryDate", val)}
-                        minDate={values.proposedDeliveryDate || new Date()}
-                        renderInput={(params) => (
-                          <TextField
-                            fullWidth
-                            {...params}
-                            name="proposedDeliveryDate"
-                          />
-                        )}
+                        minDate={values.quotationDate || new Date()}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            name: "proposedDeliveryDate",
+                            error: false,
+                            InputProps: {
+                              sx: { width: 490 },// Increase height here too
+                            },
+                          },
+                        }}
                       />
                     </Grid>
                   </Grid>
 
-                  <Grid size={{xs:12, sm:9}}>
-                    <Typography fontWeight="bold">
-                      Customer Name/Number
-                    </Typography>
-                    <TextField
-                      fullWidth
-                      placeholder="Search for customer"
-                      name="customerSearch"
-                      value={values.customerSearch}
-                      onChange={handleChange}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid size={{xs:12, sm:3}}>
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      startIcon={<AddIcon />}
-                      type="submit"
-                    >
-                      Register
-                    </Button>
-                  </Grid>
+                 <CustomerSearch
+  onCustomerSelect={(customer) => {
+    if (customer) {
+      setFieldValue("firstName", customer.firstName || "");
+      setFieldValue("middleName", customer.middleName || "");
+      setFieldValue("lastName", customer.lastName || "");
+      setFieldValue("contactNumber", customer.contactNumber?.toString() || "");
+      setFieldValue("email", customer.emailId || "");
+    } else {
+      setFieldValue("firstName", "");
+      setFieldValue("middleName", "");
+      setFieldValue("lastName", "");
+      setFieldValue("contactNumber", "");
+      setFieldValue("email", "");
+    }
+  }}
+/>
 
-                  {["firstName", "middleName", "lastName"].map((name) => (
-                    <Grid size={{xs:12, sm:4}} key={name}>
-                      <TextField
-                        fullWidth
-                        label={name.replace(/([A-Z])/g, " $1")}
-                        name={name}
-                        value={values[name]}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                  ))}
 
-                  <Grid size={{xs:12, sm:6}}>
-                    <TextField
-                      fullWidth
-                      label="Contact Number"
-                      name="contactNumber"
-                      value={values.contactNumber}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid size={{xs:12, sm:6}}>
-                    <TextField
-                      fullWidth
-                      label="Email"
-                      name="email"
-                      value={values.email}
-                      onChange={handleChange}
-                      type="email"
-                    />
-                  </Grid>
-
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="h6">From (Address)</Typography>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Name"
@@ -269,8 +237,8 @@ const QuotationForm = () => {
                       onChange={handleChange}
                     />
                   </Grid>
-                  
-                  <Grid size={{xs:12, sm:6}}>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Locality / Street"
@@ -279,7 +247,7 @@ const QuotationForm = () => {
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -295,7 +263,7 @@ const QuotationForm = () => {
                       ))}
                     </TextField>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -311,7 +279,7 @@ const QuotationForm = () => {
                       ))}
                     </TextField>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Pin Code"
@@ -321,10 +289,10 @@ const QuotationForm = () => {
                     />
                   </Grid>
 
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="h6">To (Address)</Typography>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Name"
@@ -333,8 +301,8 @@ const QuotationForm = () => {
                       onChange={handleChange}
                     />
                   </Grid>
-                  
-                  <Grid size={{xs:12, sm:6}}>
+
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Locality / Street"
@@ -343,7 +311,7 @@ const QuotationForm = () => {
                       onChange={handleChange}
                     />
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -359,7 +327,7 @@ const QuotationForm = () => {
                       ))}
                     </TextField>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       select
                       fullWidth
@@ -375,7 +343,7 @@ const QuotationForm = () => {
                       ))}
                     </TextField>
                   </Grid>
-                  <Grid size={{xs:12, sm:6}}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       label="Pin Code"
@@ -385,80 +353,80 @@ const QuotationForm = () => {
                     />
                   </Grid>
 
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <Typography variant="h6">Product Details</Typography>
                   </Grid>
 
-                    <FieldArray name="productDetails">
-  {({ push, remove, form }) => (
-    <>
-      {form.values.productDetails.map((item, index) => (
-        <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Field
-            name={`productDetails[${index}].name`}
-            as={TextField}
-            label="Product Name"
-            fullWidth
-          />
-          <Field
-            name={`productDetails[${index}].quantity`}
-            as={TextField}
-            label="Quantity"
-            type="number"
-            fullWidth
-          />
-          <Field
-            name={`productDetails[${index}].weight`}
-            as={TextField}
-            label="Weight (kg)"
-            type="number"
-            fullWidth
-          />
-          <Field
-            name={`productDetails[${index}].price`}
-            as={TextField}
-            label="Price"
-            type="number"
-            fullWidth
-          />
-          <Field
-            name={`productDetails[${index}].topay`}
-            as={TextField}
-            select
-            label="Topay / Paid"
-            fullWidth
-          >
-            <MenuItem value="paid">Paid</MenuItem>
-            <MenuItem value="toPay">To Pay</MenuItem>
-            <MenuItem value="none">None</MenuItem>
-          </Field>
-          <IconButton onClick={() => remove(index)}>
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      ))}
-      <Button
-        type="button"
-        onClick={() =>
-          push({
-            name: "",
-            quantity: "",
-            weight: "",
-            price: "",
-            topay: "none",
-          })
-        }
-        startIcon={<AddIcon />}
-      >
-        Add Product
-      </Button>
-    </>
-  )}
-</FieldArray>
+                  <FieldArray name="productDetails">
+                    {({ push, remove, form }) => (
+                      <>
+                        {form.values.productDetails.map((item, index) => (
+                          <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                            <Field
+                              name={`productDetails[${index}].name`}
+                              as={TextField}
+                              label="Product Name"
+                              fullWidth
+                            />
+                            <Field
+                              name={`productDetails[${index}].quantity`}
+                              as={TextField}
+                              label="Quantity"
+                              type="number"
+                              fullWidth
+                            />
+                            <Field
+                              name={`productDetails[${index}].weight`}
+                              as={TextField}
+                              label="Weight (kg)"
+                              type="number"
+                              fullWidth
+                            />
+                            <Field
+                              name={`productDetails[${index}].price`}
+                              as={TextField}
+                              label="Price"
+                              type="number"
+                              fullWidth
+                            />
+                            <Field
+                              name={`productDetails[${index}].topay`}
+                              as={TextField}
+                              select
+                              label="Topay / Paid"
+                              fullWidth
+                            >
+                              <MenuItem value="paid">Paid</MenuItem>
+                              <MenuItem value="toPay">To Pay</MenuItem>
+                              <MenuItem value="none">None</MenuItem>
+                            </Field>
+                            <IconButton onClick={() => remove(index)}>
+                              <DeleteIcon />
+                            </IconButton>
+                            <Button
+                              type="button"
+                              onClick={() =>
+                                push({
+                                  name: "",
+                                  quantity: "",
+                                  weight: "",
+                                  price: "",
+                                  topay: "none",
+                                })
+                              }
+                              startIcon={<AddIcon />}
+                            >
+                              Add
+                            </Button>
+                          </Box>
+                        ))}
+                      </>
+                    )}
+                  </FieldArray>
 
 
 
-                  <Grid size={{xs:12, md:9}}>
+                  <Grid size={{ xs: 12, md: 9 }}>
                     <TextField
                       name="comments"
                       label="Additional Comments"
@@ -471,26 +439,25 @@ const QuotationForm = () => {
                     />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-  <TextField
-    name="sTax"
-    label="SGST %"
-    value={values.sTax}
-    onChange={(e) => {
-      // Convert to number and ensure it's valid
-      const value = parseFloat(e.target.value);
-      setFieldValue("sTax", isNaN(value) ? 0 : value); // Default to 0 if invalid
-    }}
-    fullWidth
-    size="small"
-  />
-</Grid>
-                  <Grid size={{xs:12, md:3}}>
+                    <TextField
+                      name="sTax"
+                      label="SGST %"
+                      value={values.sTax}
+                      onChange={(e) => {
+                        // Convert to number and ensure it's valid
+                        const value = parseFloat(e.target.value);
+                        setFieldValue("sTax", isNaN(value) ? 0 : value); // Default to 0 if invalid
+                      }}
+                      fullWidth
+                      size="small"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 3 }}>
                     <Grid container spacing={2}>
                       {[
-                        ["stax", "SGST%"],
                         ["grandTotal", "Grand Total"],
                       ].map(([name, label]) => (
-                        <Grid size={{xs:6}} key={name}>
+                        <Grid size={{ xs: 6 }} key={name}>
                           <TextField
                             name={name}
                             label={label}
@@ -504,7 +471,7 @@ const QuotationForm = () => {
                     </Grid>
                   </Grid>
 
-                  <Grid size={{xs:12}}>
+                  <Grid size={{ xs: 12 }}>
                     <Button
                       type="submit"
                       fullWidth

@@ -113,9 +113,10 @@ export const getVehicleById = asyncHandler(async (req, res) => {
 
 // UPDATE Vehicle (Full Details)
 export const updateVehicle = asyncHandler(async (req, res) => {
-  const updated = await Vehicle.findByIdAndUpdate(req.params.id, req.body, {
+  const {vehicleId} = req.params;
+  const updated = await Vehicle.findOneAndUpdate({vehicleId}, req.body, {
     new: true,
-    runValidators: true,
+    
   });
 
   if (!updated) throw new ApiError(404, "Vehicle not found");

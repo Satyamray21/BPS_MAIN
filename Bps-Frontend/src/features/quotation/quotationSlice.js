@@ -13,7 +13,8 @@ export const createBooking = createAsyncThunk(
         }
         catch(err)
         {
-          console.log('Error creating booking:', err.response?.data?.message || err.message);
+          
+          console.log('Error creating booking:', err.response?.data || err.message);
             return rejectWithValue(err.response?.data?.message || err.message);
         }
     }
@@ -21,7 +22,7 @@ export const createBooking = createAsyncThunk(
 export const deleteBooking = createAsyncThunk(
   '/booking/deleteBooking',async(bookingId,thunkApi)=>{
     try{
-      const res = await axios.delete(`${BASE_URL}/delete/{bookingId}`)
+      const res = await axios.delete(`${BASE_URL}/delete/${bookingId}`)
       return bookingId;
     }
     catch(error)
@@ -36,24 +37,26 @@ export const fetchBookingRequest = createAsyncThunk(
   async (_, thunkApi) => {
     try {
       const res = await axios.get(`${BASE_URL}/booking-request-list`);
-      return res.data.data.deliveries; // ✅ Corrected return
+      console.log(res.data.deliveries); // Log the response data
+      return res.data.data.deliveries;
     } catch (error) {
-      return thunkApi.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch Booking request"
-      );
+      console.error("API Request Failed:", error);
+      return thunkApi.rejectWithValue(error.response?.data?.message || "Failed to fetch Booking request");
     }
   }
 );
+
 
 //active booking.
 export const fetchActiveBooking = createAsyncThunk(
   'booking/activeBooking', async(_,thunkApi)=>{
     try{
       const res = await axios.get(`${BASE_URL}/active-list`)
-      return {activeDeliveries: res.data.data.totalActiveDeliveries,
-        deliveries: res.data.data.deliveries,
-      };
-    }
+      return res.data.deliveries
+         
+      }
+
+    
     catch(error)
     {
        return thunkApi.rejectWithValue(error.response?.data?.message || "Failed To fetch Active Deliveries ");
@@ -65,7 +68,7 @@ export const  fetchCancelledBooking = createAsyncThunk(
   'booking.cancelledCount',async(_,thunkApi)=>{
     try{
       const res = await axios.get(`${BASE_URL}/cancelled-list`)
-      return {cancelledCount:res.data.data.totalCancelledDeliveries}
+      return res.data.deliveries;
     }
     catch(error)
     {
@@ -89,9 +92,7 @@ export const viewBookingById = createAsyncThunk(
 )
 const initialState = {
   list: [],
-  requestCount: 0,
-  activeDeliveriesCount: 0,
-  cancelledDeliveriesCount: 0,
+  
 
   form: {
   firstName: "",
@@ -180,22 +181,25 @@ const quotationSlice = createSlice({
      
     
 
-      .addCase(fetchBookingRequest.fulfilled, (state, action) => {
-        
-        state.list = action.payload;
-        })
-        .addCase(fetchBookingRequest.rejected, (state, action) => {
-         console.error("Fetch error:", action.error.message);
-        })
+      // In your extraReducers section:
+.addCase(fetchBookingRequest.fulfilled, (state, action) => {
+  state.loading=false;
+    state.list = action.payload;
+  
+  
+})
 
-        .addCase(fetchActiveBooking.fulfilled, (state, action) => {
+    .addCase(fetchCancelledBooking.fulfilled,(state,action)=>{
+      state.loading=false;
+      state.list=action.payload
+    })
+    .addCase(fetchActiveBooking.fulfilled,(state,action)=>{
+      state.loading=false;
+      state.list=action.payload
+    })
+
+
         
-        state.list = action.payload;
-        })
-        .addCase(fetchCancelledBooking.fulfilled, (state, action) => {
-        state.cancelledDeliveriesCount = action.payload.cancelledCount;
-        state.list = action.payload.deliveries;
-        })
       //view booking
       .addCase(viewBookingById.pending,(state)=>{
         state.loading=false;

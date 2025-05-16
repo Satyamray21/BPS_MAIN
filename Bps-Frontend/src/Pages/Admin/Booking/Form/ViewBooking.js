@@ -88,21 +88,7 @@ const ViewBooking = () => {
           />
         </Grid>
 
-        <Grid size ={{xs:12, sm:9}}>
-          <Typography fontWeight="bold">Customer Name/Number</Typography>
-          <TextField
-            fullWidth
-            value={booking.customerSearch}
-            InputProps={{
-              readOnly: true,
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+        
        
         <Grid size ={{xs:12, sm:4}}>
           <TextField
@@ -133,7 +119,7 @@ const ViewBooking = () => {
           <TextField
             fullWidth
             label="Contact Number"
-            value={booking.contactNumber}
+            value={booking.mobile}
             InputProps={{ readOnly: true }}
           />
         </Grid>

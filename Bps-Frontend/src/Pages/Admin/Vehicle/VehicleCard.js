@@ -128,6 +128,9 @@ const VehicleCard = () => {
         setPage(0);
     };
 
+    const handleEdit=(vehicleId)=>{
+        navigate(`/editvehicle/${vehicleId}`)
+    }
     useEffect(() => {
             switch (selectedList) {
                 case 'total':
@@ -364,7 +367,7 @@ const handleView = (vehicleId) => {
                                                     <DeleteIcon fontSize="small" />
                                                 </IconButton>
                                                 <IconButton size="small" color="default">
-                                                    <MoreVertIcon fontSize="small" />
+                                                    <MoreVertIcon fontSize="small" onClick={() => handleEdit(row.vehicleId)}/>
                                                 </IconButton>
                                             </Box>
                                         </TableCell>

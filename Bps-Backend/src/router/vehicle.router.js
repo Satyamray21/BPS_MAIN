@@ -18,7 +18,7 @@ import { parseFormData } from "../middleware/multerParser.middleware.js";
 const router = express.Router();
 
 
-router.post("/vehicle",parseFormData, createVehicle);
+router.post("/vehicle", createVehicle);
 
 
 router.get("/getAllvehicle", getAllVehicles);

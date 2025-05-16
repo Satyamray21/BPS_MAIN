@@ -252,7 +252,7 @@ const bookingSlice = createSlice({
         state.error=null
         const updatedBooking = action.payload
         const index = state.list.findIndex(booking=> booking.bookingId === updatedBooking.bookingId );
-        if(index != -1)
+        if(index !== -1)
         {
            state.list[index] =  updatedBooking;
         }

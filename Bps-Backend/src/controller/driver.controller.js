@@ -6,7 +6,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import {upload} from "../middleware/multer.middleware.js"
 // Helper function to format driver list
 const formatDriverList = (drivers) => {
-    console.log(drivers);
+
     return drivers.map((driver, index) => ({
         sNo: index + 1,
         driverId: driver.driverId,

@@ -15,7 +15,7 @@ import {parseFormData } from '../middleware/multerParser.middleware.js'
 const router = express.Router();
 
 // Assign a delivery to a booking
-router.post('/assign', parseFormData,assignDelivery);
+router.post('/assign', assignDelivery);
 
 // List all Booking Deliveries
 router.get('/booking', listBookingDeliveries);

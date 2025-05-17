@@ -8,17 +8,15 @@ const deliverySchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking" },
-quotationId: { type: mongoose.Schema.Types.ObjectId, ref: "Quotation" },
-deliveryType: { type: String, enum: ["Booking", "Quotation"], required: true },
+  bookingId: { type: String }, // ✅ changed from ObjectId
+  quotationId: { type: String }, // ✅ changed from ObjectId
+  deliveryType: { type: String, enum: ["Booking", "Quotation"], required: true },
 
- 
-  
   driverName: {
     type: String,
     required: true,
   },
-  vehicleId: {
+  vehicleModel: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Vehicle", 
     required: true,
@@ -31,6 +29,7 @@ deliveryType: { type: String, enum: ["Booking", "Quotation"], required: true },
 }, {
   timestamps: true,
 });
+ 
 
 const Delivery = mongoose.model("Delivery", deliverySchema);
 export default Delivery;

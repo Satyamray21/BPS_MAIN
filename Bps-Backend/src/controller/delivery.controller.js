@@ -32,62 +32,84 @@ const populateVehicleAndBooking = (query) => {
 // Assign a delivery to a booking
 // Assign a delivery to a booking or quotation
 export const assignDelivery = asyncHandler(async (req, res) => {
-  const { bookingId, driverName, vehicleId } = req.body;
+  console.log("req",req.body);
+  const { bookingIds = [], quotationIds = [], driverName, vehicleModel } = req.body;
 
-  if (!bookingId || !driverName || !vehicleId) {
-    throw new ApiError(400, "Booking ID (or Quotation ID), Driver Name, and Vehicle ID are required.");
+  if ((!bookingIds.length && !quotationIds.length) || !driverName || !vehicleModel) {
+    throw new ApiError(400, "Booking or Quotation IDs, Driver Name, and Vehicle Model are required.");
   }
 
-  const vehicle = await Vehicle.findOne({ vehicleId: vehicleId });
+  // Find vehicle by model name (string)
+  const vehicle = await Vehicle.findOne({ vehicleModel });
   if (!vehicle) {
-    throw new ApiError(404, "Vehicle not found with this vehicleId.");
+    throw new ApiError(404, "Vehicle not found with this model.");
   }
 
-  // First try to find booking
-  const booking = await Booking.findOne({ bookingId: bookingId });
+  const vehicleId = vehicle._id; // use this ObjectId for queries and assignments
 
-  // If not booking, try to find quotation
-  let quotation = null;
-  if (!booking) {
-    quotation = await Quotation.findOne({ bookingId: bookingId });
-    if (!quotation) {
-      throw new ApiError(404, `No Booking or Quotation found with bookingId: ${bookingId}`);
-    }
+  // Check active assignment for this vehicleModel (use ObjectId)
+  const activeVehicle = await Delivery.findOne({ vehicleModel: vehicleId, status: { $ne: "Completed" } });
+  if (activeVehicle) {
+    throw new ApiError(400, "This vehicle is already assigned to an active delivery.");
   }
 
-  // Check if a delivery is already assigned
-  let deliveryExist;
-  if (booking) {
-    deliveryExist = await Delivery.findOne({ bookingId: booking._id });
-  } else {
-    deliveryExist = await Delivery.findOne({ quotationId: quotation._id });
+  // Check active assignment for this driver
+  const activeDriver = await Delivery.findOne({ driverName, status: { $ne: "Completed" } });
+  if (activeDriver) {
+    throw new ApiError(400, "This driver is already assigned to an active delivery.");
   }
 
-  if (deliveryExist) {
-    throw new ApiError(400, "Delivery already assigned to this Booking/Quotation.");
+  const deliveries = [];
+
+  // Assign to Bookings
+  for (const bookingId of bookingIds) {
+    const booking = await Booking.findOne({ bookingId });
+    if (!booking) continue;
+
+    const alreadyAssigned = await Delivery.findOne({ bookingId });
+    if (alreadyAssigned) continue;
+
+    deliveries.push({
+      orderId: generateOrderId(),
+      bookingId,
+      deliveryType: "Booking",
+      driverName,
+      vehicleModel: vehicleId,
+      status: "Pending",
+    });
   }
 
-  const orderId = generateOrderId();
+  // Assign to Quotations
+  for (const quotationId of quotationIds) {
+    const quotation = await Quotation.findOne({ bookingId: quotationId });
+    if (!quotation) continue;
 
-  const deliveryData = {
-    orderId,
-    driverName,
-    vehicleId: vehicle._id,
-    status: "Pending",
-  };
+    const alreadyAssigned = await Delivery.findOne({ quotationId });
+    if (alreadyAssigned) continue;
 
-  if (booking) {
-    deliveryData.bookingId = booking._id;
-    deliveryData.deliveryType = "Booking";
-  } else {
-    deliveryData.quotationId = quotation._id;
-    deliveryData.deliveryType = "Quotation";
+    deliveries.push({
+      orderId: generateOrderId(),
+      quotationId,
+      deliveryType: "Quotation",
+      driverName,
+      vehicleModel: vehicleId,
+      status: "Pending",
+    });
   }
 
-  const delivery = await Delivery.create(deliveryData);
+  if (!deliveries.length) {
+    throw new ApiError(400, "No valid unassigned bookings or quotations found.");
+  }
 
-  res.status(201).json(new ApiResponse(201, delivery, "Delivery assigned successfully."));
+  const createdDeliveries = await Delivery.insertMany(deliveries);
+
+  res.status(201).json(
+    new ApiResponse(201, createdDeliveries, "Deliveries assigned successfully.")
+  );
 });
+
+
+
 
 
 // List all Booking Deliveries

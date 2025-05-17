@@ -6,6 +6,7 @@ import driverReducer from '../features/Driver/driverSlice'
 import bookingReducer from '../features/booking/bookingSlice'
 import quotationReducer from '../features/quotation/quotationSlice'
 import vehicleReducer from '../features/vehicle/vehicleSlice'
+import deliveryReducer from '../features/delivery/deliverySlice'
 export const store = configureStore({
   reducer: {
     stations: stationReducer,
@@ -15,6 +16,7 @@ export const store = configureStore({
     bookings:bookingReducer,
     quotations:quotationReducer,
     vehicles:vehicleReducer,
+    deliveries:deliveryReducer
 
   },
 });

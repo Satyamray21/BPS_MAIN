@@ -39,21 +39,21 @@ export const assignDelivery = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Booking or Quotation IDs, Driver Name, and Vehicle Model are required.");
   }
 
-  // Find vehicle by model name (string)
+  
   const vehicle = await Vehicle.findOne({ vehicleModel });
   if (!vehicle) {
     throw new ApiError(404, "Vehicle not found with this model.");
   }
 
-  const vehicleId = vehicle._id; // use this ObjectId for queries and assignments
+  const vehicleId = vehicle._id; 
 
-  // Check active assignment for this vehicleModel (use ObjectId)
+  
   const activeVehicle = await Delivery.findOne({ vehicleModel: vehicleId, status: { $ne: "Completed" } });
   if (activeVehicle) {
     throw new ApiError(400, "This vehicle is already assigned to an active delivery.");
   }
 
-  // Check active assignment for this driver
+  
   const activeDriver = await Delivery.findOne({ driverName, status: { $ne: "Completed" } });
   if (activeDriver) {
     throw new ApiError(400, "This driver is already assigned to an active delivery.");
@@ -69,6 +69,8 @@ export const assignDelivery = asyncHandler(async (req, res) => {
     const alreadyAssigned = await Delivery.findOne({ bookingId });
     if (alreadyAssigned) continue;
 
+     booking.activeDelivery = true;
+     await booking.save();
     deliveries.push({
       orderId: generateOrderId(),
       bookingId,
@@ -86,7 +88,8 @@ export const assignDelivery = asyncHandler(async (req, res) => {
 
     const alreadyAssigned = await Delivery.findOne({ quotationId });
     if (alreadyAssigned) continue;
-
+    quotation.activeDelivery = true;
+    await quotation.save();
     deliveries.push({
       orderId: generateOrderId(),
       quotationId,

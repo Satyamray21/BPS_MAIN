@@ -27,10 +27,12 @@ import QuotationForm from '../Pages/Admin/Quotation/Form/QuotationForm'
 import CustomerUpdate from '../Pages/Admin/Customer/Form/CustomerUpdate';
 import VehicleForm from '../Pages/Admin/Vehicle/Form/VehicleForm';
 import ViewBooking from '../Pages/Admin/Booking/Form/ViewBooking';
+import EditBooking from '../Pages/Admin/Booking/Form/EditBooking'
 import ViewVehicle from '../Pages/Admin/Vehicle/Form/ViewVehicle';
 import EditVehicle from '../Pages/Admin/Vehicle/Form/EditVehicle';
 import ViewQuotation from '../Pages/Admin/Quotation/Form/ViewQuotation';
 import EditQuotations from '../Pages/Admin/Quotation/Form/EditQuotation';
+
 const MainRoute = () => {
     const isAuthenticated = true; // Replace with real auth check
 
@@ -78,6 +80,7 @@ const MainRoute = () => {
                 <Route path='/booking' element={<BookingCard />} />
                 <Route path='/booking/new' element={<BookingForm />} />
                 <Route path ='/booking/:bookingId' element = {<ViewBooking />} />
+                <Route path ='/editbooking/:bookingId' element = {<EditBooking />} />
 
                 {/* Quotation routing */}
                 <Route path='/quotation' element={<QuotationCard />} />

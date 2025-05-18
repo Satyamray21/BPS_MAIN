@@ -149,8 +149,8 @@ const BookingCard = () => {
    
 
 
-  const handleEdit = (row) => {
-    navigate(`/booking/${row.id}`, { state: { booking: row, mode: 'edit' } });
+  const handleEdit = (bookingId) => {
+    navigate(`/editbooking/${bookingId}`);
   };
 
   const handleDeleteClick = (row) => {
@@ -393,7 +393,7 @@ console.log("data",bookingList);
                         <IconButton
                           size="small"
                           color="primary"
-                          onClick={() => handleEdit(row)}
+                          onClick={() => handleEdit(row.bookingId)}
                           title="Edit"
                         >
                           <EditIcon fontSize="small" />

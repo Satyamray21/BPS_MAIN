@@ -96,10 +96,10 @@ export const viewBookingById = createAsyncThunk(
   }
 )
 export const updateBookingById  = createAsyncThunk(
-  'booking/update',async(bookingId,thunkApi)=>{
+  'booking/update',async({bookingId,data},thunkApi)=>{
     try{
        
-      const res = await axios.put(`${BASE_URL}/${bookingId}`)
+      const res = await axios.put(`${BASE_URL}/${bookingId}`,data)
       return res.data;
     }
     catch(err)

@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect,useState} from "react";
 import * as Yup from "yup";
 import { Formik, Form, FieldArray } from "formik";
 import {
@@ -14,57 +14,54 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
+import { useNavigate, useParams } from "react-router-dom";
+import {useDispatch,useSelector} from 'react-redux'
+import { viewBookingById, updateBookingById} from "../../../../features/booking/bookingSlice";
 
-const stationOptions = ["Station A", "Station B", "Station C"];
-const states = ["State A", "State B", "State C"];
-const cities = ["City A", "City B", "City C"];
-const payOptions = ["None", "To Pay", "Paid"];
+const toPay = ['pay', 'paid','none'];
 
-
-const generateRandomData = () => {
-  const randomItem = () => ({
-    receiptNo: `RCPT${Math.floor(1000 + Math.random() * 9000)}`,
-    refNo: `REF${Math.floor(1000 + Math.random() * 9000)}`,
-    insurance: Math.floor(Math.random() * 1000),
-    vppAmount: Math.floor(Math.random() * 500),
-    toPay: payOptions[Math.floor(Math.random() * payOptions.length)],
-    weight: Math.floor(1 + Math.random() * 50),
-    amount: Math.floor(50 + Math.random() * 500),
-  });
-
-  return {
-    startStation: stationOptions[Math.floor(Math.random() * stationOptions.length)],
-    endStation: stationOptions[Math.floor(Math.random() * stationOptions.length)],
-    bookingDate: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
-    deliveryDate: new Date(Date.now() + Math.floor(1 + Math.random() * 14) * 24 * 60 * 60 * 1000),
-    customerSearch: `Customer${Math.floor(1 + Math.random() * 100)}`,
-    firstName: ["John", "Jane", "Robert", "Emily", "Michael"][Math.floor(Math.random() * 5)],
-    middleName: ["A.", "B.", "C.", "D.", "E."][Math.floor(Math.random() * 5)],
-    lastName: ["Smith", "Johnson", "Williams", "Brown", "Jones"][Math.floor(Math.random() * 5)],
-    contactNumber: `9${Math.floor(100000000 + Math.random() * 900000000)}`,
-    email: `user${Math.floor(1 + Math.random() * 100)}@example.com`,
-    senderName: `Sender ${Math.floor(1 + Math.random() * 10)}`,
-    senderLocality: `${Math.floor(1 + Math.random() * 100)} Main St`,
-    fromCity: cities[Math.floor(Math.random() * cities.length)],
-    senderGgt: `GSTIN${Math.floor(1000 + Math.random() * 9000)}`,
-    fromState: states[Math.floor(Math.random() * states.length)],
-    senderPincode: `${Math.floor(100000 + Math.random() * 900000)}`,
-    receiverName: `Receiver ${Math.floor(1 + Math.random() * 10)}`,
-    receiverLocality: `${Math.floor(1 + Math.random() * 100)} Park Ave`,
-    receiverGgt: `GSTIN${Math.floor(1000 + Math.random() * 9000)}`,
-    toState: states[Math.floor(Math.random() * states.length)],
-    toCity: cities[Math.floor(Math.random() * cities.length)],
-    toPincode: `${Math.floor(100000 + Math.random() * 900000)}`,
-    items: Array.from({ length: Math.floor(1 + Math.random() * 3) }, randomItem),
-    addComment: Math.random() > 0.5 ? "Handle with care" : "Fragile items included",
-    freight: Math.floor(100 + Math.random() * 500),
-    ins_vpp: Math.floor(50 + Math.random() * 200),
-    billTotal: Math.floor(500 + Math.random() * 1500),
-    cgst: Math.floor(5 + Math.random() * 10),
-    sgst: Math.floor(5 + Math.random() * 10),
-    igst: Math.floor(5 + Math.random() * 10),
-    grandTotal: Math.floor(1000 + Math.random() * 3000),
-  };
+const initialValues = {
+  startStation: "",
+  endStation: "",
+  bookingDate: null,
+  deliveryDate: null,
+  customerSearch: "",
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  mobile: "",
+  email: "",
+  senderName: "",
+  senderLocality: "",
+  fromCity: "",
+  senderGgt: "",
+  fromState: "",
+  senderPincode: "",
+  receiverName: "",
+  receiverLocality: "",
+  receiverGgt: "",
+  toState: "",
+  toCity: "",
+  toPincode: "",
+  items: [
+    {
+      receiptNo: "",
+      refNo: "",
+      insurance: "",
+      vppAmount: "",
+      toPayPaid: "",
+      weight: "",
+      amount: "",
+    },
+  ],
+  addComment: "",
+  freight: "",
+  ins_vpp: "",
+  billTotal: "",
+  cgst: "",
+  sgst: "",
+  igst: "",
+  grandTotal: "",
 };
 
 const validationSchema = Yup.object().shape({
@@ -76,7 +73,7 @@ const validationSchema = Yup.object().shape({
   firstName: Yup.string().required("First Name is required"),
   middleName: Yup.string(),
   lastName: Yup.string().required("Last Name is required"),
-  contactNumber: Yup.string()
+   mobile: Yup.string()
     .matches(/^\d{10}$/, "Contact Number must be 10 digits")
     .required("Contact Number is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -142,15 +139,32 @@ const validationSchema = Yup.object().shape({
 });
 
 const EditBooking = () => {
-  const initialValues = generateRandomData();
-
+  const {bookingId} = useParams();
+  const dispatch = useDispatch();
+   const { loading, error, viewedBooking } = useSelector(state => state.bookings);
+    useEffect(() => {
+           if (bookingId) {
+               dispatch(viewBookingById(bookingId));
+           }
+       }, [bookingId, dispatch]);
+   
+       useEffect(() => {
+          
+       }, [viewedBooking]);
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Formik
-        initialValues={initialValues}
+        initialValues={{
+                    ...initialValues,
+                    ...viewedBooking,
+                    bookingDate: viewedBooking?.bookingDate ? new Date(viewedBooking.bookingDate) : new Date(),
+                   deliveryDate: viewedBooking?.deliveryDate ? new Date(viewedBooking.deliveryDate) : new Date(),
+  
+                }}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          console.log("Form Submitted:", values);
+          dispatch(updateBookingById({ bookingId, data: values }))
+                                  .unwrap()
         }}
         enableReinitialize
       >
@@ -158,38 +172,26 @@ const EditBooking = () => {
           <Form>
             <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
               <Grid container spacing={2}>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Start Station"
-                    name="startStation"
-                    value={values.startStation}
-                    onChange={handleChange}
-                  >
-                    {stationOptions.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Destination Station"
-                    name="endStation"
-                    value={values.endStation}
-                    onChange={handleChange}
-                  >
-                    {stationOptions.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Start Station"
+                                                            name="startStation"
+                                                            value={values.startStation.stationName}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
+                                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="Destination Station"
+                                                            name="endStation"
+                                                            value={values.endStation.stationName}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
 
                 <Grid size ={{xs:12, sm:6}}>
                   <DatePicker
@@ -277,8 +279,8 @@ const EditBooking = () => {
                   <TextField
                     fullWidth
                     label="Contact Number"
-                    name="contactNumber"
-                    value={values.contactNumber}
+                    name="mobile"
+                    value={values.mobile}
                     onChange={handleChange}
                   />
                 </Grid>
@@ -323,38 +325,26 @@ const EditBooking = () => {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="State"
-                    name="fromState"
-                    value={values.fromState}
-                    onChange={handleChange}
-                  >
-                    {states.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="City"
-                    name="fromCity"
-                    value={values.fromCity}
-                    onChange={handleChange}
-                  >
-                    {cities.map((c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="State"
+                                                            name="fromState"
+                                                            value={values.fromState}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="City"
+                                                            name="fromCity"
+                                                            value={values.fromCity}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
                 <Grid size ={{xs:12, sm:6}}>
                   <TextField
                     fullWidth
@@ -395,38 +385,26 @@ const EditBooking = () => {
                     onChange={handleChange}
                   />
                 </Grid>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="State"
-                    name="toState"
-                    value={values.toState}
-                    onChange={handleChange}
-                  >
-                    {states.map((s) => (
-                      <MenuItem key={s} value={s}>
-                        {s}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
-                <Grid size ={{xs:12, sm:6}}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="City"
-                    name="toCity"
-                    value={values.toCity}
-                    onChange={handleChange}
-                  >
-                    {cities.map((c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="State"
+                                                            name="toState"
+                                                            value={values.toState}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
+                                                    <Grid size={{ xs: 12, sm: 6 }}>
+                                                        <TextField
+                                                            fullWidth
+                                                            label="City"
+                                                            name="toCity"
+                                                            value={values.toCity}
+                                                            onChange={handleChange}
+                                                        >
+                                                        </TextField>
+                                                    </Grid>
                 <Grid size ={{xs:12, sm:6}}>
                   <TextField
                     fullWidth
@@ -524,7 +502,7 @@ const EditBooking = () => {
                               value={item.toPay}
                               onChange={handleChange}
                             >
-                              {payOptions.map((p) => (
+                              {toPay.map((p) => (
                                 <MenuItem key={p} value={p}>
                                   {p}
                                 </MenuItem>

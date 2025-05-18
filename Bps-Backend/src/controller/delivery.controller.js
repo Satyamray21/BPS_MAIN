@@ -32,31 +32,57 @@ const populateVehicleAndBooking = (query) => {
 // Assign a delivery to a booking
 // Assign a delivery to a booking or quotation
 export const assignDelivery = asyncHandler(async (req, res) => {
-  console.log("req",req.body);
+  console.log("req", req.body);
   const { bookingIds = [], quotationIds = [], driverName, vehicleModel } = req.body;
 
   if ((!bookingIds.length && !quotationIds.length) || !driverName || !vehicleModel) {
     throw new ApiError(400, "Booking or Quotation IDs, Driver Name, and Vehicle Model are required.");
   }
 
-  
+  // Find vehicle
   const vehicle = await Vehicle.findOne({ vehicleModel });
   if (!vehicle) {
     throw new ApiError(404, "Vehicle not found with this model.");
   }
 
-  const vehicleId = vehicle._id; 
+  const vehicleId = vehicle._id;
 
-  
-  const activeVehicle = await Delivery.findOne({ vehicleModel: vehicleId, status: { $ne: "Completed" } });
-  if (activeVehicle) {
-    throw new ApiError(400, "This vehicle is already assigned to an active delivery.");
+  // Check for active delivery conflicts based on delivery type
+  let existingDriverDelivery = null;
+  let existingVehicleDelivery = null;
+
+  if (bookingIds.length) {
+    existingDriverDelivery = await Delivery.findOne({
+      driverName,
+      deliveryType: "Booking",
+      status: { $ne: "Completed" },
+    });
+    existingVehicleDelivery = await Delivery.findOne({
+      vehicleModel: vehicleId,
+      deliveryType: "Booking",
+      status: { $ne: "Completed" },
+    });
   }
 
-  
-  const activeDriver = await Delivery.findOne({ driverName, status: { $ne: "Completed" } });
-  if (activeDriver) {
-    throw new ApiError(400, "This driver is already assigned to an active delivery.");
+  if (quotationIds.length) {
+    existingDriverDelivery = await Delivery.findOne({
+      driverName,
+      deliveryType: "Quotation",
+      status: { $ne: "Completed" },
+    });
+    existingVehicleDelivery = await Delivery.findOne({
+      vehicleModel: vehicleId,
+      deliveryType: "Quotation",
+      status: { $ne: "Completed" },
+    });
+  }
+
+  if (existingDriverDelivery) {
+    throw new ApiError(400, "This driver is already assigned to an active delivery of this type.");
+  }
+
+  if (existingVehicleDelivery) {
+    throw new ApiError(400, "This vehicle is already assigned to an active delivery of this type.");
   }
 
   const deliveries = [];
@@ -69,8 +95,9 @@ export const assignDelivery = asyncHandler(async (req, res) => {
     const alreadyAssigned = await Delivery.findOne({ bookingId });
     if (alreadyAssigned) continue;
 
-     booking.activeDelivery = true;
-     await booking.save();
+    booking.activeDelivery = true;
+    await booking.save();
+
     deliveries.push({
       orderId: generateOrderId(),
       bookingId,
@@ -88,8 +115,10 @@ export const assignDelivery = asyncHandler(async (req, res) => {
 
     const alreadyAssigned = await Delivery.findOne({ quotationId });
     if (alreadyAssigned) continue;
+
     quotation.activeDelivery = true;
     await quotation.save();
+
     deliveries.push({
       orderId: generateOrderId(),
       quotationId,
@@ -110,6 +139,8 @@ export const assignDelivery = asyncHandler(async (req, res) => {
     new ApiResponse(201, createdDeliveries, "Deliveries assigned successfully.")
   );
 });
+
+
 
 
 

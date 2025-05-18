@@ -220,7 +220,7 @@ const DeliveryCard = () => {
                 <Typography sx={{ mt: 2 }}>Loading...</Typography>
             ) : currentList?.length > 0 ? (
                 currentList.map((item, idx) => {
-                    const uniqueId = item._id || item.bookingId || `index-${idx}`;
+                    const uniqueId = item._id || item.bookingId || item['Booking ID'] || `index-${idx}`;
                     return (
                         <Box key={uniqueId} sx={{
                             display: 'grid',
@@ -235,7 +235,7 @@ const DeliveryCard = () => {
                                 onChange={() => handleCheckboxChange(uniqueId)}
                             />
                             <Typography>{idx + 1}</Typography>
-                            <Typography>{item.bookingId}</Typography>
+                            <Typography>{item.bookingId || item['Booking ID']}</Typography>
                             <Typography>{item.fromName || item.Name}</Typography>
                             <Typography>{item.pickup || item['Pick up']}</Typography>
                             <Typography>{item.drop || item.Drop}</Typography>

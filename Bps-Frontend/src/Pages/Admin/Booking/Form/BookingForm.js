@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
 import {fetchStations} from '../../../../features/stations/stationSlice'
 import { createBooking } from '../../../../features/booking/bookingSlice';
+import { useNavigate } from "react-router-dom";
 
 
 const toPay = ['pay', 'paid','none'];
@@ -99,7 +100,7 @@ const BookingForm = () => {
   const dispatch = useDispatch();
   const { states, cities } = useSelector((state) => state.location);
   const { list: stations } = useSelector((state) => state.stations);
-
+const navigate =useNavigate();
 
   useEffect(() => {
     dispatch(fetchStates());
@@ -114,6 +115,7 @@ const BookingForm = () => {
           try {
             await dispatch(createBooking(values)).unwrap();
             formikHelpers.resetForm();
+            navigate('/booking')
           } catch (error) {
             console.log("Error while adding booking", error);
           }

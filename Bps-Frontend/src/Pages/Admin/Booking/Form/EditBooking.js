@@ -17,7 +17,8 @@ import AddIcon from "@mui/icons-material/Add";
 import { useNavigate, useParams } from "react-router-dom";
 import {useDispatch,useSelector} from 'react-redux'
 import { viewBookingById, updateBookingById} from "../../../../features/booking/bookingSlice";
-
+import {fetchStations} from '../../../../features/stations/stationSlice'
+import { fetchStates, fetchCities, clearCities } from '../../../../features/Location/locationSlice';
 const toPay = ['pay', 'paid','none'];
 
 const initialValues = {
@@ -103,9 +104,7 @@ const validationSchema = Yup.object().shape({
       vppAmount: Yup.number()
         .typeError("VPP Amount must be a number")
         .min(0, "Cannot be negative"),
-      toPay: Yup.number()
-        .typeError("To Pay must be a number")
-        .min(0, "Cannot be negative"),
+      
       weight: Yup.number()
         .typeError("Weight must be a number")
         .min(0, "Cannot be negative"),
@@ -141,7 +140,13 @@ const validationSchema = Yup.object().shape({
 const EditBooking = () => {
   const {bookingId} = useParams();
   const dispatch = useDispatch();
+  const { list: stations } = useSelector((state) => state.stations);
    const { loading, error, viewedBooking } = useSelector(state => state.bookings);
+   const { states, cities } = useSelector((state) => state.location);
+   useEffect(()=>{
+    dispatch(fetchStations());
+    dispatch(fetchStations());
+   },[dispatch])
     useEffect(() => {
            if (bookingId) {
                dispatch(viewBookingById(bookingId));
@@ -173,25 +178,38 @@ const EditBooking = () => {
             <Box sx={{ p: 3, maxWidth: 1200, mx: "auto" }}>
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                                                        <TextField
-                                                            fullWidth
-                                                            label="Start Station"
-                                                            name="startStation"
-                                                            value={values.startStation.stationName}
-                                                            onChange={handleChange}
-                                                        >
-                                                        </TextField>
-                                                    </Grid>
-                                                    <Grid size={{ xs: 12, sm: 6 }}>
-                                                        <TextField
-                                                            fullWidth
-                                                            label="Destination Station"
-                                                            name="endStation"
-                                                            value={values.endStation.stationName}
-                                                            onChange={handleChange}
-                                                        >
-                                                        </TextField>
-                                                    </Grid>
+                                  <TextField
+                                    select
+                                    fullWidth
+                                    label="Start Station"
+                                    name="startStation"
+                                    value={values.startStation}
+                                    onChange={handleChange}
+                                  >
+                                    {stations.map((station) => (
+                                    <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
+                                            {station.stationName}
+                                     </MenuItem>
+                                      ))}
+                
+                                  </TextField>
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6 }}>
+                                  <TextField
+                                    select
+                                    fullWidth
+                                    label="Destination Station"
+                                    name="endStation"
+                                    value={values.endStation}
+                                    onChange={handleChange}
+                                  >
+                                    {stations.map((station) => (
+                                    <MenuItem key={station.stationId || station.sNo} value={station.stationName}>
+                                            {station.stationName}
+                                     </MenuItem>
+                                      ))}
+                                  </TextField>
+                                </Grid>
 
                 <Grid size ={{xs:12, sm:6}}>
                   <DatePicker

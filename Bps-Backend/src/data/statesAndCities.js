@@ -1,6 +1,6 @@
 
 
-export const stateAndCities = 
+const rawStateAndCities = 
   {
     "Andaman and Nicobar Islands": [
       "Port Blair"
@@ -1290,3 +1290,15 @@ export const stateAndCities =
       "Adra"
     ]
   }
+  // Sort cities inside each state
+for (const state in rawStateAndCities) {
+  rawStateAndCities[state].sort((a, b) => a.localeCompare(b));
+}
+
+// Sort states alphabetically
+export const stateAndCities = Object.keys(rawStateAndCities)
+  .sort((a, b) => a.localeCompare(b))
+  .reduce((acc, state) => {
+    acc[state] = rawStateAndCities[state];
+    return acc;
+  }, {});

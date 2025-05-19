@@ -87,10 +87,7 @@ const quotationSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  sgst: {
-    type: Number,
-    // required: true
-  },
+  
   grandTotal: {
     type: Number,
   },
@@ -98,10 +95,7 @@ const quotationSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  freight: {
-    type: Number,
-    // required:true
-  },
+  
   productDetails: [
     {
       name: {
@@ -135,6 +129,10 @@ const quotationSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  computedTotalRevenue: {
+  type: Number,
+  default: 0,
+},
 
 }, { timestamps: true });
 
@@ -147,29 +145,12 @@ quotationSchema.pre("save", async function (next) {
   }
 
 
-  // quotationSchema.virtual("bookingRequestTotal").get(function () {
-  //   return this.productDetails.reduce((acc, item) => acc + item.quantity, 0);
-  // });
-
-  // quotationSchema.virtual("totalTax").get(function () {
-  //   return this.sTax + this.sgst + this.freight;
-  // });
-
-  // quotationSchema.virtual("computedTotalRevenue").get(function () {
-
-  //   const productTotal = this.productDetails.reduce((acc, item) => {
-  //     return acc + (item.price * item.quantity);
-  //   }, 0);
-
-
-  //   const totalRevenue = productTotal - (this.sTax + this.sgst) + this.amount;
-
-  //   return totalRevenue;
-  // });
-  // const productTotal = this.productDetails.reduce((acc, item) => {
-  //   return acc + item.price * item.quantity;
-  // }, 0);
-  // this.grandTotal = productTotal + this.sTax + this.sgst + this.amount;
+  const productTotal = this.productDetails.reduce((acc, item) => {
+  return acc + (item.price * item.quantity);
+}, 0);
+this.grandTotal = productTotal + this.sTax + this.amount;
+this.computedTotalRevenue = productTotal + this.amount - this.sTax;
+console.log('computedTotalRevenue:', this.computedTotalRevenue);
 
   next();
 });

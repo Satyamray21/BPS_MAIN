@@ -21,6 +21,10 @@ import {
     InputAdornment,
     useTheme,
     Button,
+    MenuItem,
+    ListItemIcon,
+    Menu,
+    ListItemText,
 } from "@mui/material";
 import {
     Edit as EditIcon,
@@ -32,16 +36,15 @@ import {
     LocalShipping as LocalShippingIcon,
 } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
-import {useDispatch,useSelector} from 'react-redux';
-import {getAvailableVehiclesCount,getDeactivatedVehiclesCount,getBlacklistedVehiclesCount,getTotalVehiclesCount,
-    getTotalVehiclesList,getBlacklistedVehiclesList,getAvailableVehiclesList,getDeactivatedVehicles,deleteVehicle
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    getAvailableVehiclesCount, getDeactivatedVehiclesCount, getBlacklistedVehiclesCount, getTotalVehiclesCount,
+    getTotalVehiclesList, getBlacklistedVehiclesList, getAvailableVehiclesList, getDeactivatedVehicles, deleteVehicle
+    ,updateStatus
 } from '../../../features/vehicle/vehicleSlice';
-
-
-
-
-
-
+import BlockIcon from '@mui/icons-material/Block';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -73,9 +76,10 @@ const headCells = [
     { id: "action", label: "Action", sortable: false },
 ];
 
-const VehicleCard = () => {
+const VehicleCard = ({ onSelect }) => {
     const theme = useTheme();
     const navigate = useNavigate();
+    const [anchorEl, setAnchorEl] = useState(null);
     const cardColor = "#0155a5";
     const cardLightColor = "#e6f0fa";
     const [activeCard, setActiveCard] = useState(null);
@@ -84,32 +88,31 @@ const VehicleCard = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [searchTerm, setSearchTerm] = useState("");
-    const [vehicleRows,setVehicleRows] = useState([])
-     const [selectedList, setSelectedList] = useState('available');
+    const [vehicleRows, setVehicleRows] = useState([])
+    const [selectedList, setSelectedList] = useState('available');
 
     const dispatch = useDispatch();
-    const {list:vehicleList,availableCount,
-    deactiveCount,
-    blacklistedCount,
-    totalCount} = useSelector(state => state.vehicles);
-    useEffect(()=>{
-        if(vehicleList)
-        {
+    const { list: vehicleList, availableCount,
+        deactiveCount,
+        blacklistedCount,
+        totalCount } = useSelector(state => state.vehicles);
+    useEffect(() => {
+        if (vehicleList) {
             setVehicleRows(vehicleList);
         }
-    },[vehicleList]);
-    useEffect(()=>{
+    }, [vehicleList]);
+    useEffect(() => {
         dispatch(getAvailableVehiclesCount());
         dispatch(getBlacklistedVehiclesCount());
         dispatch(getDeactivatedVehiclesCount());
         dispatch(getTotalVehiclesCount());
-       // dispatch(getAvailableVehiclesList());
-    },[dispatch])
+        // dispatch(getAvailableVehiclesList());
+    }, [dispatch])
     const handleAdd = () => {
         navigate("/vehicleform");
     };
 
-    
+
 
     const handleRequestSort = (property) => {
         const isAsc = orderBy === property && order === "asc";
@@ -129,82 +132,98 @@ const VehicleCard = () => {
         setPage(0);
     };
 
-    const handleEdit=(vehicleId)=>{
+    const handleEdit = (vehicleId) => {
         navigate(`/editvehicle/${vehicleId}`)
     }
     useEffect(() => {
-            switch (selectedList) {
-                case 'total':
-                    dispatch(getTotalVehiclesList());
-                    break;
-                case 'available':
-                    dispatch(getAvailableVehiclesList());
-                    break;
-                case 'blacklisted':
-                    dispatch(getBlacklistedVehiclesList());
-                    break;
-                case 'deactivated':
-                    dispatch(getDeactivatedVehicles());
-                    break;
-                default:
-                    break;
-            }
-        }, [selectedList, dispatch]); // re-run when selectedList changes
-    
-        const handleCardClick = (type) => {
-            setSelectedList(type); // triggers useEffect to auto-fetch
-        };
-        const cardData = [
-    {
-        id: 1,
-        title: "Available Vehicle",
-        type:"available",
-        value: availableCount,
-        duration: "NaN% (30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 2,
-        title: "Total Vehicle ",
-        type:"total",
-        value: totalCount,
-        duration: "NaN% (30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 3,
-        title: "Deactivated Vehicle",
-        type:"deactivated",
-        value: deactiveCount,
-        duration: "(30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-    {
-        id: 4,
-        title: "Blacklisted Vehicle",
-        type:"blacklisted",
-        value: blacklistedCount,
-        duration: "(30 Days)",
-        icon: <LocalShippingIcon fontSize="large" />,
-    },
-];
+        switch (selectedList) {
+            case 'total':
+                dispatch(getTotalVehiclesList());
+                break;
+            case 'available':
+                dispatch(getAvailableVehiclesList());
+                break;
+            case 'blacklisted':
+                dispatch(getBlacklistedVehiclesList());
+                break;
+            case 'deactivated':
+                dispatch(getDeactivatedVehicles());
+                break;
+            default:
+                break;
+        }
+    }, [selectedList, dispatch]); // re-run when selectedList changes
+
+    const handleCardClick = (type) => {
+        setSelectedList(type); // triggers useEffect to auto-fetch
+    };
+    const handleStatusChange = (vehicleId, action) => {
+    dispatch(updateStatus({ vehicleId, action }));
+    window.location.reload();
+    };
+    const cardData = [
+        {
+            id: 1,
+            title: "Available Vehicle",
+            type: "available",
+            value: availableCount,
+            duration: "NaN% (30 Days)",
+            icon: <LocalShippingIcon fontSize="large" />,
+        },
+        {
+            id: 2,
+            title: "Total Vehicle ",
+            type: "total",
+            value: totalCount,
+            duration: "NaN% (30 Days)",
+            icon: <LocalShippingIcon fontSize="large" />,
+        },
+        {
+            id: 3,
+            title: "Deactivated Vehicle",
+            type: "deactivated",
+            value: deactiveCount,
+            duration: "(30 Days)",
+            icon: <LocalShippingIcon fontSize="large" />,
+        },
+        {
+            id: 4,
+            title: "Blacklisted Vehicle",
+            type: "blacklisted",
+            value: blacklistedCount,
+            duration: "(30 Days)",
+            icon: <LocalShippingIcon fontSize="large" />,
+        },
+    ];
     const filteredRows = vehicleRows.filter(
-    (row) =>
-        row.vehicleModel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.ownedBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        row.currentLocation?.toLowerCase().includes(searchTerm.toLowerCase())
-);
-const handleView = (vehicleId) => {
-    navigate(`/vehicleview/${vehicleId}`);
-  }
-  const handleDelete = (vehicleId) => {
-          if (window.confirm("Are you sure you want to delete this Vehicle ?")) {
-              
-              dispatch(deleteVehicle(vehicleId));
-          }
-      }
+        (row) =>
+            row.vehicleModel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            row.ownedBy?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            row.currentLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const handleView = (vehicleId) => {
+        navigate(`/vehicleview/${vehicleId}`);
+    }
+    const handleDelete = (vehicleId) => {
+        if (window.confirm("Are you sure you want to delete this Vehicle ?")) {
+
+            dispatch(deleteVehicle(vehicleId));
+        }
+    }
 
     const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
+
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = (option) => {
+        setAnchorEl(null);
+        if (option) {
+            onSelect(option);
+        }
+    };
+
 
     return (
         <Box sx={{ p: 2 }}>
@@ -367,17 +386,59 @@ const handleView = (vehicleId) => {
                                         <TableCell>{row.vehicleModel}</TableCell>
                                         <TableCell>
                                             <Box>
-                                    <IconButton size="small" color="primary"  onClick={() => handleEdit(row.vehicleId)}>
-                                                                                                <EditIcon fontSize="small" />
-                                                                                            </IconButton>
-                                                                                            <IconButton size="small" color="info" onClick={() => handleView(row.vehicleId)}>
-                                                                                                <VisibilityIcon fontSize="small" />
-                                                                                            </IconButton>
-                                                                                            <IconButton size="small" color="error" onClick={() => handleDelete(row.vehicleId)}>
-                                                                                                <DeleteIcon fontSize="small" />
-                                                                                            </IconButton>
+                                                <IconButton size="small" color="primary" onClick={() => handleEdit(row.vehicleId)}>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" color="info" onClick={() => handleView(row.vehicleId)}>
+                                                    <VisibilityIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" color="error" onClick={() => handleDelete(row.vehicleId)}>
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                                <IconButton size="small" title="More options" onClick={handleClick}>
+                                                    <MoreVertIcon fontSize="small" />
+                                                </IconButton>
+                                                <Menu
+                                                    anchorEl={anchorEl}
+                                                    open={Boolean(anchorEl)}
+                                                    onClose={() => handleClose()}
+                                                    anchorOrigin={{
+                                                        vertical: 'bottom',
+                                                        horizontal: 'left',
+                                                    }}
+                                                    transformOrigin={{
+                                                        vertical: 'top',
+                                                        horizontal: 'left',
+                                                    }}
+                                                    PaperProps={{
+                                                        style: {
+                                                            borderRadius: 10,
+                                                            minWidth: 160,
+                                                            padding: '4px 0',
+                                                        }
+                                                    }}
+                                                >
+                                                    <MenuItem onClick={() => handleStatusChange(row.vehicleId,'available')}>
+                                                        <ListItemIcon>
+                                                            <CheckCircleIcon sx={{ color: 'green' }} fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary="Active" />
+                                                    </MenuItem>
+                                                    <MenuItem onClick={() => handleStatusChange(row.vehicleId,'deactivated')}>
+                                                        <ListItemIcon>
+                                                            <CancelIcon sx={{ color: 'orange' }} fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary="Inactive" />
+                                                    </MenuItem>
+                                                    <MenuItem onClick={() => handleStatusChange(row.vehicleId,'blacklisted')}>
+                                                        <ListItemIcon>
+                                                            <BlockIcon sx={{ color: 'red' }} fontSize="small" />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary="Blacklisted" />
+                                                    </MenuItem>
+                                                </Menu>
                                             </Box>
-                                            
+
                                         </TableCell>
                                     </TableRow>
                                 ))}

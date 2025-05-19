@@ -118,9 +118,10 @@ const BookingCard = () => {
     navigate("/booking/new");
   };
 
-  const handleCardClick = (type) => {
+  const handleCardClick = (type,route) => {
     
     dispatch(fetchBookingsByType(type));
+    navigate(route);
   };
 
   const handleRequestSort = (property) => {
@@ -211,6 +212,7 @@ const BookingCard = () => {
     value: "Rs.",
     subtitle: "Total Revenue",
     duration: "100% (30 Days)",
+    route: "/totalrevenue",
     icon: <AccountBalanceWalletIcon fontSize="large" />,
   },
 ];
@@ -254,7 +256,7 @@ console.log("data",bookingList);
             sx={{ minWidth: 220, flex: 1, display: "flex", borderRadius: 2 }}
           >
             <Card
-              onClick={() =>  handleCardClick(card.type)}
+              onClick={() =>  handleCardClick(card.type,card.route)}
               sx={{
                 flex: 1,
                 cursor: "pointer",

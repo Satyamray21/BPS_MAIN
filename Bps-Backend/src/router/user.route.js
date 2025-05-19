@@ -61,7 +61,7 @@ router.route("/admin/user/:adminId").put(upload.fields([
 
 router.route("/changePassword").post(changePassword);
 router.route("/send-reset-code").post(sentResetCode);
-router.delete("/admin/user/:adminId", deleteUser);
+router.delete("/admin/user/:adminId",verifyJwt, deleteUser);
 
 // Admin user counts
 router.get("/admin/count/admins", countTotalAdmins);

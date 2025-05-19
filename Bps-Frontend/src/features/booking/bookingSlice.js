@@ -108,11 +108,28 @@ export const updateBookingById  = createAsyncThunk(
     }
   }
 )
+export const revenueList= createAsyncThunk(
+  'revenueList/booking',async(_,thunkApi)=>
+  {
+    try{
+      const res = await axios.get(`${BASE_URL}/revenue-list`);
+      return {totalRevenue:res.data.totalRevenue,
+        revenueList:res.data.data
+      }
+      }
+      catch(err)
+      {
+       return thunkApi.rejectWithValue(err.response?.data?.message || 'failed to view totalReveunue')
+      }
+    }
+  
+)
 const initialState = {
   list: [],
   requestCount: 0,
   activeDeliveriesCount: 0,
   cancelledDeliveriesCount: 0,
+  totalRevenue:0,
 
   form: {
   startStation: "",
@@ -259,7 +276,20 @@ const bookingSlice = createSlice({
 
         state.form = initialState.form
       })
-
+      //totalReveune
+      .addCase(revenueList.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(revenueList.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.totalRevenue=action.payload.totalRevenue;
+        state.revenueList=action.payload.revenueList;
+      })
+      .addCase(revenueList.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload;
+      })
     ;
  }
 })

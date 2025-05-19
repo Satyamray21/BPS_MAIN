@@ -150,7 +150,7 @@ const TotalRevenue = () => {
     setBookingToDelete(null);
   };
 
-  const filteredRows = bookingList.filter((row) =>
+  const filteredRows = (bookingList || []).filter((row) =>
     Object.values(row).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )

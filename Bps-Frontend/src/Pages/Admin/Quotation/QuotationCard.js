@@ -114,9 +114,10 @@ const QuotationCard = () => {
     navigate("/quotationform");
   };
 
-  const handleCardClick = (type) => {
+  const handleCardClick = (type,route) => {
     setSelectedList(type);
     setActiveCard(type);
+     navigate(route);
   };
 
   const handleRequestSort = (property) => {
@@ -184,6 +185,7 @@ const QuotationCard = () => {
       value: "Rs.",
       subtitle: "Total Revenue",
       duration: "100% (30 Days)",
+      route: "/totalrevenu",
       icon: <AccountBalanceWalletIcon fontSize="large" />,
     },
   ];
@@ -215,7 +217,7 @@ const QuotationCard = () => {
         {cardData.map((card) => (
           <Grid item key={card.id} sx={{ minWidth: 220, flex: 1, display: "flex", borderRadius: 2 }}>
             <Card
-              onClick={() => handleCardClick(card.type)}
+              onClick={() => handleCardClick(card.type,card.route)}
               sx={{
                 flex: 1,
                 cursor: "pointer",

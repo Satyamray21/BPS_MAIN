@@ -89,7 +89,7 @@ const MainRoute = () => {
                 <Route path='/quotationform' element={<QuotationForm />} />
                 <Route path="/viewquotation/:bookingId" element={<ViewQuotation />} />
                 <Route path="/updatequotation/:bookingId" element={<EditQuotations />} />
-                 <Route path='/totalrevenue' element={<TotaLRevenue/>} />
+                 <Route path='/totalrevenu' element={<TotaLRevenue/>} />
 
                 
 

@@ -32,6 +32,8 @@ import ViewVehicle from '../Pages/Admin/Vehicle/Form/ViewVehicle';
 import EditVehicle from '../Pages/Admin/Vehicle/Form/EditVehicle';
 import ViewQuotation from '../Pages/Admin/Quotation/Form/ViewQuotation';
 import EditQuotations from '../Pages/Admin/Quotation/Form/EditQuotation';
+import TotalRevenue from '../Pages/Admin/Booking/TotalRevenue';
+import TotaLRevenue from '../Pages/Admin/Quotation/TotalRevenue'
 
 const MainRoute = () => {
     const isAuthenticated = true; // Replace with real auth check
@@ -81,12 +83,13 @@ const MainRoute = () => {
                 <Route path='/booking/new' element={<BookingForm />} />
                 <Route path ='/booking/:bookingId' element = {<ViewBooking />} />
                 <Route path ='/editbooking/:bookingId' element = {<EditBooking />} />
-
+                <Route path='/totalrevenue' element={<TotalRevenue/>} />
                 {/* Quotation routing */}
                 <Route path='/quotation' element={<QuotationCard />} />
                 <Route path='/quotationform' element={<QuotationForm />} />
                 <Route path="/viewquotation/:bookingId" element={<ViewQuotation />} />
                 <Route path="/updatequotation/:bookingId" element={<EditQuotations />} />
+                 <Route path='/totalrevenue' element={<TotaLRevenue/>} />
 
                 
 

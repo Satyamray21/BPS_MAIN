@@ -43,7 +43,7 @@ export const viewBooking = async (req, res) => {
  * POST /api/bookings
  */
 export const createBooking = async (req, res) => {
-  console.log("req", req.body);
+  
   try {
     const {
       startStation: startName,
@@ -200,6 +200,7 @@ export const sendBookingEmail = async (email, booking) => {
 
 
 export const updateBooking = async (req, res) => {
+  console.log("Req ",req.body);
   try {
     const { id } = req.params;
     const updates = { ...req.body };

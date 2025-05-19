@@ -126,7 +126,7 @@ export const createQuotation = asyncHandler(async (req, res, next) => {
   });
 
   await quotation.save();
-
+  await sendBookingEmail(customer.emailId, quotation);
   res
     .status(201)
     .json(new ApiResponse(201, quotation, "Quotation created successfully"));
@@ -163,7 +163,7 @@ export const getQuotationById = asyncHandler(async (req, res, next) => {
 export const updateQuotation = asyncHandler(async (req, res, next) => {
   const { bookingId } = req.params;
   const updatedData = req.body;
-  console.log("📝 Update request body:", updatedData);
+  
   const updatedQuotation = await Quotation.findOneAndUpdate({bookingId},updatedData,{new:true});
   
   if (!updatedQuotation) return next(new ApiError(404, "Quotation not found"));
@@ -362,21 +362,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-export const sendBookingEmail = async (req, res) => {
-  try {
-    const { bookingId } = req.body;
-
-    // Find the booking using bookingId
-    const booking = await Quotation.findOne({ bookingId });
-
-    if (!booking) {
-      return res.status(404).json({ message: 'Quotation not found' });
-    }
+export const sendBookingEmail = async (email, booking) => {
+  
 
     const { 
       firstName, 
       lastName, 
-      email, 
+ 
       fromAddress, 
       fromCity, 
       fromState, 
@@ -414,19 +406,12 @@ export const sendBookingEmail = async (req, res) => {
         <p>Best regards,<br>BharatParcel Team</p>
       `
     };
-    
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ message: 'Failed to send email' });
-      } else {
-        console.log('Email sent: ' + info.response);
-        return res.status(200).json({ message: 'Email sent successfully' });
-      }
-    });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+    try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Booking confirmation email sent to ${email}`);
+  } catch (error) {
+    console.error('Error sending booking confirmation email:', error);
   }
+
+ 
 };

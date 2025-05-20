@@ -118,6 +118,31 @@ export const updateCustomer = createAsyncThunk(
   }
 );
 
+export const updateStatusActivate = createAsyncThunk(
+  'customers/activate',async(customerId,thunkApi)=>{
+    try{
+      const res = await axios.patch(`${BASE_URL}/status/activate/${customerId}`);
+      return res.data.message
+    }
+    catch(err)
+    {
+      return thunkApi.rejectWithValue(err.response?.data?.message || 'Failed to update Status');
+    }
+  }
+)
+export const updateStatusBacklist = createAsyncThunk(
+  'customers/blacklisted',async(customerId,thunkApi)=>{
+    try{
+      const res = await axios.patch(`${BASE_URL}/status/blacklist/${customerId}`);
+      return res.data.message;
+    }
+    catch(err)
+    {
+        return thunkApi.rejectWithValue(err.response?.data?.message || 'Failed to update Status');
+    }
+  }
+)
+
 const initialState = {
   list: [],
   activeCount: 0,
@@ -306,7 +331,41 @@ const customerSlice = createSlice({
       .addCase(updateCustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+      })
+      .addCase(updateStatusActivate.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(updateStatusActivate.fulfilled,(state,action)=>{
+        state.loading=false;
+        const updatedCustomer = action.payload;
+        const index = state.list.findIndex(v => v._id === updatedCustomer._id);
+        if (index !== -1) {
+        state.list[index] = updatedCustomer; 
+        }
+      })
+      .addCase(updateStatusActivate.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
+      })
+      .addCase(updateStatusBacklist.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(updateStatusBacklist.fulfilled,(state,action)=>{
+        state.loading=false;
+        const updatedCustomer = action.payload;
+        const index = state.list.findIndex(v => v._id === updatedCustomer._id);
+        if (index !== -1) {
+        state.list[index] = updatedCustomer
+        }
+      })
+      .addCase(updateStatusBacklist.rejected,(state,action)=>{
+        state.loading=false;
+        state.list=action.payload
+      })
+      ;
+
   }
 });
 

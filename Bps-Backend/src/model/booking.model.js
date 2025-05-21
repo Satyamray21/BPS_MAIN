@@ -220,7 +220,18 @@ const BookingSchema = new mongoose.Schema(
     invoiceGenerated: {
       type: Boolean,
       default: false
-    }
+    },
+  createdByUser: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'User',
+  required: true
+},
+  createdByRole: {
+  type: String,
+  enum: ['admin', 'supervisor'],
+  required: true
+}
+
   },
   { timestamps: true }
 );

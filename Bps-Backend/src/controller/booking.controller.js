@@ -2,6 +2,7 @@ import Booking from '../model/booking.model.js';
 import Station from '../model/manageStation.model.js';
 import { Customer } from '../model/customer.model.js';
 import nodemailer from 'nodemailer';
+import {User} from '../model/user.model.js'
 
 async function resolveStation(name) {
   const station = await Station.findOne({ stationName: new RegExp(`^${name}$`, 'i') });
@@ -45,6 +46,7 @@ export const viewBooking = async (req, res) => {
 export const createBooking = async (req, res) => {
   
   try {
+     const user = req.user;
     const {
       startStation: startName,
       endStation: endName,
@@ -126,6 +128,8 @@ export const createBooking = async (req, res) => {
       igst,
       billTotal,
       grandTotal,
+      createdByUser: user._id,
+      createdByRole: user.role
     });
 
     // Save the booking
@@ -275,6 +279,7 @@ export const getBookingStatusList = async (req, res) => {
     const bookings = await Booking.find(filter)
       .select('bookingId firstName lastName senderName receiverName bookingDate mobile startStation endStation')
       .populate('startStation endStation', 'stationName')
+      .populate('createdByUser', ' role')
       .lean();
 
     // Filter out bookings with missing station references
@@ -282,7 +287,7 @@ export const getBookingStatusList = async (req, res) => {
 
     const data = validBookings.map((b, i) => ({
       SNo: i + 1,
-      orderBy: `${b.firstName} ${b.lastName}`,
+      orderBy: b.createdByUser?.role || 'N/A',
       date: b.bookingDate?.toISOString().slice(0, 10) || 'N/A',
       fromName: b.senderName || 'N/A',
       pickup: b.startStation?.stationName || 'N/A',

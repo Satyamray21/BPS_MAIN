@@ -16,6 +16,7 @@ import {
 } from '../controller/booking.controller.js';
 
 import {parseFormData} from "../middleware/multerParser.middleware.js";
+import {verifyJwt} from '../middleware/auth.middleware.js'
 const router = express.Router();
 
 router.get('/booking-list', getBookingStatusList);
@@ -28,7 +29,7 @@ router.post('/send-booking-email', sendBookingEmail);
 
 
 //  CRUD routes AFTER static routes
-router.post('/', createBooking);           // Create a new booking
+router.post('/',verifyJwt, createBooking);           // Create a new booking
 router.patch('/:id/activate', activateBooking);
 router.patch('/:bookingId/cancel',cancelBooking);
 router.get('/:id', viewBooking);           // View by bookingId (not _id!)

@@ -21,7 +21,7 @@ export const createBooking = createAsyncThunk(
 export const deleteBooking = createAsyncThunk(
   '/booking/deleteBooking',async(bookingId,thunkApi)=>{
     try{
-      const res = await axios.delete(`${BASE_URL}/delete/{bookingId}`)
+      const res = await axios.delete(`${BASE_URL}/delete/${bookingId}`)
       return bookingId;
     }
     catch(error)
@@ -123,6 +123,19 @@ export const revenueList= createAsyncThunk(
       }
     }
   
+)
+export const cancelBooking = createAsyncThunk(
+  'cancel/booking',async(bookingId,thunkApi)=>{
+    try{
+      const res = await axios.patch(`${BASE_URL}/${bookingId}/cancel`)
+      return res.data.booking;
+
+    }
+    catch(err)
+    {
+      return thunkApi.rejectWithValue(err.response?.data?.message);
+    }
+  }
 )
 const initialState = {
   list: [],
@@ -289,6 +302,18 @@ const bookingSlice = createSlice({
       .addCase(revenueList.rejected,(state,action)=>{
         state.loading=false;
         state.error=action.payload;
+      })
+      .addCase(cancelBooking.pending,(state)=>{
+        state.loading=true;
+        state.error=null
+      })
+      .addCase(cancelBooking.fulfilled,(state,action)=>{
+        state.loading=false;
+        state.list=action.payload
+      })
+      .addCase(cancelBooking.rejected,(state,action)=>{
+        state.loading=false;
+        state.error=action.payload
       })
     ;
  }

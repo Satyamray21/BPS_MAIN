@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -35,10 +35,12 @@ import {
   Book as BookOnlineIcon,
   LocalShipping as LocalShippingIcon,
   Visibility as VisibilityIcon,
+  
 } from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
-import {useDispatch,useSelector} from 'react-redux';
-import {bookingRequestCount,activeBookingCount,cancelledBookingCount,fetchBookingsByType} from '../../../features/booking/bookingSlice'
+
+import { useDispatch, useSelector } from 'react-redux';
+import { bookingRequestCount, activeBookingCount, cancelledBookingCount, fetchBookingsByType,cancelBooking,deleteBooking } from '../../../features/booking/bookingSlice'
 
 
 const createData = (id, orderby, date, namep, pickup, named, drop, contact) => ({
@@ -101,25 +103,25 @@ const BookingCard = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState(null);
   const dispatch = useDispatch();
-  const { list: bookingList, requestCount,activeDeliveriesCount, cancelledDeliveriesCount} = useSelector(state => state.bookings);
+  const { list: bookingList, requestCount, activeDeliveriesCount, cancelledDeliveriesCount } = useSelector(state => state.bookings);
   useEffect(() => {
-  if (bookingList && Array.isArray(bookingList)) {
-    setBookings(bookingList);
-  }
-}, [bookingList]);
+    if (bookingList && Array.isArray(bookingList)) {
+      setBookings(bookingList);
+    }
+  }, [bookingList]);
 
-  useEffect(()=>{
+  useEffect(() => {
     dispatch(fetchBookingsByType('request'));
     dispatch(bookingRequestCount());
     dispatch(activeBookingCount());
     dispatch(cancelledBookingCount());
-  },[dispatch])
+  }, [dispatch])
   const handleAdd = () => {
     navigate("/booking/new");
   };
 
-  const handleCardClick = (type,route) => {
-    
+  const handleCardClick = (type, route) => {
+
     dispatch(fetchBookingsByType(type));
     navigate(route);
   };
@@ -142,12 +144,11 @@ const BookingCard = () => {
     setPage(0);
   };
 
-  const handleView = (bookingId) =>
-    {
-      console.log("Navigating to booking ID:", bookingId);
-      navigate(`/booking/${bookingId}`);
-    };
-   
+  const handleView = (bookingId) => {
+    console.log("Navigating to booking ID:", bookingId);
+    navigate(`/booking/${bookingId}`);
+  };
+
 
 
   const handleEdit = (bookingId) => {
@@ -158,9 +159,13 @@ const BookingCard = () => {
     setBookingToDelete(row);
     setDeleteDialogOpen(true);
   };
+  const handleCancel = (bookingId) =>{
+    dispatch(cancelBooking(bookingId))
+    window.location.reload();
+  }
 
-  const handleDeleteConfirm = () => {
-    setBookings(bookings.filter(booking => booking.id !== bookingToDelete.id));
+  const handleDeleteConfirm = (bookingId) => {
+    dispatch(deleteBooking(bookingId))
     setDeleteDialogOpen(false);
     setBookingToDelete(null);
   };
@@ -170,7 +175,7 @@ const BookingCard = () => {
     setBookingToDelete(null);
   };
 
-  const filteredRows = bookingList.filter(
+  const filteredRows = Array.isArray(bookingList) ? bookingList.filter(
     (row) =>
       (row.orderby && row.orderby.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (row.namep && row.namep.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -178,47 +183,48 @@ const BookingCard = () => {
       (row.pickup && row.pickup.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (row.drop && row.drop.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (row.contact && row.contact.includes(searchTerm))
-  );
+  ):[]
+  ;
   const cardData = [
-  {
-    id: 1,
-    title: "Booking",
-    value: requestCount,
-    subtitle: "Requests",
-    duration: "0% (30 Days)",
-    type :"request",
-    icon: <BookOnlineIcon fontSize="large" />,
-  },
-  {
-    id: 2,
-    title: "Active ",
-    value: activeDeliveriesCount,
-    subtitle: "Deliveries",
-    duration: "100% (30 Days)",
-    type:"active",
-    icon: <LocalShippingIcon fontSize="large" />,
-  },
-  {
-    id: 3,
-    title: "Total Cancelled",
-    value: cancelledDeliveriesCount,
-    duration: "0% (30 Days)",
-    type : "cancelled",
-    icon: <CancelScheduleSendIcon fontSize="large" />,
-  },
-  {
-    id: 4,
-    title: "0.00",
-    value: "Rs.",
-    subtitle: "Total Revenue",
-    duration: "100% (30 Days)",
-    route: "/totalrevenue",
-    icon: <AccountBalanceWalletIcon fontSize="large" />,
-  },
-];
+    {
+      id: 1,
+      title: "Booking",
+      value: requestCount,
+      subtitle: "Requests",
+      duration: "0% (30 Days)",
+      type: "request",
+      icon: <BookOnlineIcon fontSize="large" />,
+    },
+    {
+      id: 2,
+      title: "Active ",
+      value: activeDeliveriesCount,
+      subtitle: "Deliveries",
+      duration: "100% (30 Days)",
+      type: "active",
+      icon: <LocalShippingIcon fontSize="large" />,
+    },
+    {
+      id: 3,
+      title: "Total Cancelled",
+      value: cancelledDeliveriesCount,
+      duration: "0% (30 Days)",
+      type: "cancelled",
+      icon: <CancelScheduleSendIcon fontSize="large" />,
+    },
+    {
+      id: 4,
+      title: "0.00",
+      value: "Rs.",
+      subtitle: "Total Revenue",
+      duration: "100% (30 Days)",
+      route: "/totalrevenue",
+      icon: <AccountBalanceWalletIcon fontSize="large" />,
+    },
+  ];
 
   const emptyRows = Math.max(0, (1 + page) * rowsPerPage - filteredRows.length);
-console.log("data",bookingList);
+  console.log("data", bookingList);
   return (
     <Box sx={{ p: 2 }}>
       <Box
@@ -256,7 +262,7 @@ console.log("data",bookingList);
             sx={{ minWidth: 220, flex: 1, display: "flex", borderRadius: 2 }}
           >
             <Card
-              onClick={() =>  handleCardClick(card.type,card.route)}
+              onClick={() => handleCardClick(card.type, card.route)}
               sx={{
                 flex: 1,
                 cursor: "pointer",
@@ -402,8 +408,16 @@ console.log("data",bookingList);
                         </IconButton>
                         <IconButton
                           size="small"
+                          color="primary"
+                          onClick={() => handleCancel(row.bookingId)}
+                          title="CancelScheduleSend"
+                        >
+                          <CancelScheduleSendIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
                           color="error"
-                          onClick={() => handleDeleteClick(row)}
+                          onClick={() => handleDeleteClick(row.bookingId)}
                           title="Delete"
                         >
                           <DeleteIcon fontSize="small" />
